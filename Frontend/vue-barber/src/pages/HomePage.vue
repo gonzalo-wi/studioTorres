@@ -2,25 +2,26 @@
 import { RouterLink } from 'vue-router'
 import BaseButton from '@/components/BaseButton.vue'
 import Card from '@/components/Card.vue'
+import { ScissorsIcon, SparklesIcon, UserIcon, ClockIcon, CalendarIcon } from '@heroicons/vue/24/outline'
 
 const features = [
   {
-    icon: '✂️',
+    icon: ScissorsIcon,
     title: 'Cortes Profesionales',
     description: 'Técnicas modernas y clásicas adaptadas a tu estilo'
   },
   {
-    icon: '🪒',
+    icon: SparklesIcon,
     title: 'Afeitado Tradicional',
     description: 'Experiencia premium con productos de primera calidad'
   },
   {
-    icon: '⭐',
+    icon: UserIcon,
     title: 'Atención Personalizada',
     description: 'Cada cliente es único y merece un trato especial'
   },
   {
-    icon: '🕐',
+    icon: ClockIcon,
     title: 'Horarios Flexibles',
     description: 'Abierto de lunes a sábado para tu comodidad'
   }
@@ -85,8 +86,9 @@ const testimonials = [
           
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <RouterLink to="/book">
-              <BaseButton size="lg" class="w-full sm:w-auto">
-                Reservá tu Turno 🪒
+              <BaseButton size="lg" class="w-full sm:w-auto flex items-center justify-center gap-2">
+                <CalendarIcon class="w-5 h-5" />
+                Reservá tu Turno
               </BaseButton>
             </RouterLink>
             <RouterLink to="/services">
@@ -125,7 +127,9 @@ const testimonials = [
             hover
             class="p-6 text-center"
           >
-            <div class="text-5xl mb-4">{{ feature.icon }}</div>
+            <div class="mb-4 flex justify-center">
+              <component :is="feature.icon" class="w-12 h-12 text-primary-500" />
+            </div>
             <h3 class="text-xl font-display font-bold text-white mb-2">
               {{ feature.title }}
             </h3>

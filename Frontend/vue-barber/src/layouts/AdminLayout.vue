@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import { ChartBarIcon, CalendarDaysIcon } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
 const { logout } = useAuth()
@@ -12,8 +13,8 @@ const handleLogout = () => {
 }
 
 const navLinks = [
-  { to: '/admin', label: 'Dashboard', icon: '📊' },
-  { to: '/admin/bookings', label: 'Turnos', icon: '📅' }
+  { to: '/admin', label: 'Dashboard', icon: ChartBarIcon },
+  { to: '/admin/bookings', label: 'Turnos', icon: CalendarDaysIcon }
 ]
 </script>
 
@@ -39,7 +40,7 @@ const navLinks = [
               :to="link.to"
               class="text-gray-300 hover:text-white font-semibold transition-colors flex items-center space-x-2"
             >
-              <span>{{ link.icon }}</span>
+              <component :is="link.icon" class="w-5 h-5" />
               <span class="hidden sm:inline">{{ link.label }}</span>
             </RouterLink>
             

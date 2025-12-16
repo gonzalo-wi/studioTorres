@@ -216,14 +216,14 @@ const handleSubmit = async () => {
                   Horarios disponibles <span class="text-primary-500">*</span>
                 </label>
                 
-                <div v-if="availableSlots.length > 0" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                <div v-if="availableSlots.length > 0" class="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
                   <button
                     v-for="slot in availableSlots"
                     :key="slot.time"
                     type="button"
                     @click="selectTimeSlot(slot)"
                     :class="[
-                      'px-4 py-3 rounded-lg font-semibold transition-all border-2',
+                      'px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg text-sm sm:text-base font-semibold transition-all border-2',
                       formData.time === slot.time
                         ? 'bg-primary-600 border-primary-600 text-white'
                         : 'bg-dark-800 border-dark-700 text-gray-300 hover:border-primary-600 hover:text-white'

@@ -7,6 +7,7 @@ import BaseSelect from '@/components/BaseSelect.vue'
 import BaseInput from '@/components/BaseInput.vue'
 import { fetchBookings, getAllServices } from '@/services/bookingsService'
 import { formatDate } from '@/utils/dateHelpers'
+import { ClockIcon } from '@heroicons/vue/24/outline'
 
 const bookings = ref([])
 const loading = ref(true)
@@ -145,7 +146,7 @@ onMounted(() => {
 
     <!-- Loading -->
     <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin text-4xl mb-4">⏳</div>
+      <ClockIcon class="w-12 h-12 mx-auto mb-4 text-gray-400 animate-pulse" />
       <p class="text-gray-400">Cargando turnos...</p>
     </div>
 

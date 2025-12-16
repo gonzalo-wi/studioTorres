@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BaseButton from '@/components/BaseButton.vue'
 import Card from '@/components/Card.vue'
@@ -7,6 +7,7 @@ import BadgeStatus from '@/components/BadgeStatus.vue'
 import Modal from '@/components/Modal.vue'
 import { fetchBookingById, updateBooking, confirmBooking, cancelBooking } from '@/services/bookingsService'
 import { formatDate } from '@/utils/dateHelpers'
+import { CheckCircleIcon, XCircleIcon, PhoneIcon, ChatBubbleLeftIcon, ClockIcon } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
 const router = useRouter()
@@ -71,10 +72,6 @@ const canCancel = computed(() =>
 )
 </script>
 
-<script>
-import { computed } from 'vue'
-</script>
-
 <template>
   <div>
     <!-- Header -->
@@ -97,7 +94,7 @@ import { computed } from 'vue'
 
     <!-- Loading -->
     <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin text-4xl mb-4">⏳</div>
+      <ClockIcon class="w-12 h-12 mx-auto mb-4 text-gray-400 animate-pulse" />
       <p class="text-gray-400">Cargando información...</p>
     </div>
 
@@ -128,8 +125,10 @@ import { computed } from 'vue'
               @click="handleConfirm"
               :loading="actionLoading"
               :disabled="actionLoading"
+              class="flex items-center gap-2"
             >
-              ✅ Confirmar Turno
+              <CheckCircleIcon class="w-5 h-5" />
+              Confirmar Turno
             </BaseButton>
 
             <BaseButton
@@ -137,8 +136,10 @@ import { computed } from 'vue'
               variant="danger"
               @click="showCancelModal = true"
               :disabled="actionLoading"
+              class="flex items-center gap-2"
             >
-              ❌ Cancelar Turno
+              <XCircleIcon class="w-5 h-5" />
+              Cancelar Turno
             </BaseButton>
 
             <BaseButton
@@ -201,9 +202,10 @@ import { computed } from 'vue'
                 :href="`https://wa.me/${booking.phone.replace(/\D/g, '')}`"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="text-primary-500 hover:text-primary-400 text-sm mt-2 inline-block"
+                class="text-primary-500 hover:text-primary-400 text-sm mt-2 inline-flex items-center gap-1"
               >
-                💬 Contactar por WhatsApp →
+                <ChatBubbleLeftIcon class="w-4 h-4" />
+                Contactar por WhatsApp →
               </a>
             </div>
           </div>
@@ -215,17 +217,19 @@ import { computed } from 'vue'
           <div class="space-y-3">
             <a
               :href="`tel:${booking.phone}`"
-              class="block w-full px-4 py-3 bg-dark-900 hover:bg-dark-700 text-white rounded-lg text-center transition-colors"
+              class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-dark-900 hover:bg-dark-700 text-white rounded-lg transition-colors"
             >
-              📞 Llamar
+              <PhoneIcon class="w-5 h-5" />
+              Llamar
             </a>
             <a
               :href="`https://wa.me/${booking.phone.replace(/\D/g, '')}?text=Hola ${booking.name}, te contacto desde Hernán Barber respecto a tu turno del ${booking.date} a las ${booking.time}.`"
               target="_blank"
               rel="noopener noreferrer"
-              class="block w-full px-4 py-3 bg-dark-900 hover:bg-dark-700 text-white rounded-lg text-center transition-colors"
+              class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-dark-900 hover:bg-dark-700 text-white rounded-lg transition-colors"
             >
-              💬 WhatsApp
+              <ChatBubbleLeftIcon class="w-5 h-5" />
+              WhatsApp
             </a>
           </div>
         </Card>

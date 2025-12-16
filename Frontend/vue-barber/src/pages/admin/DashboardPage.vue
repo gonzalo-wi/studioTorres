@@ -1,9 +1,11 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import Card from '@/components/Card.vue'
+import BadgeStatus from '@/components/BadgeStatus.vue'
 import { getBookingStats, fetchBookings } from '@/services/bookingsService'
 import { formatDate } from '@/utils/dateHelpers'
+import { CalendarDaysIcon, ClockIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/outline'
 
 const stats = ref({
   today: 0,
@@ -36,33 +38,28 @@ const statCards = computed(() => [
   {
     label: 'Turnos Hoy',
     value: stats.value.today,
-    icon: '📅',
+    icon: CalendarDaysIcon,
     color: 'bg-blue-500/10 text-blue-500 border-blue-500/20'
   },
   {
     label: 'Pendientes',
     value: stats.value.pending,
-    icon: '⏳',
+    icon: ClockIcon,
     color: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
   },
   {
     label: 'Confirmados',
     value: stats.value.confirmed,
-    icon: '✅',
+    icon: CheckCircleIcon,
     color: 'bg-green-500/10 text-green-500 border-green-500/20'
   },
   {
     label: 'Cancelados',
     value: stats.value.cancelled,
-    icon: '❌',
+    icon: XCircleIcon,
     color: 'bg-red-500/10 text-red-500 border-red-500/20'
   }
 ])
-</script>
-
-<script>
-import { computed } from 'vue'
-import BadgeStatus from '@/components/BadgeStatus.vue'
 </script>
 
 <template>
@@ -79,7 +76,7 @@ import BadgeStatus from '@/components/BadgeStatus.vue'
 
     <!-- Loading -->
     <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin text-4xl mb-4">⏳</div>
+      <ClockIcon class="w-12 h-12 mx-auto mb-4 text-gray-400 animate-pulse" />
       <p class="text-gray-400">Cargando datos...</p>
     </div>
 
@@ -97,8 +94,8 @@ import BadgeStatus from '@/components/BadgeStatus.vue'
               <p class="text-gray-400 text-sm mb-2">{{ stat.label }}</p>
               <p class="text-4xl font-bold text-white">{{ stat.value }}</p>
             </div>
-            <div :class="['text-3xl p-3 rounded-lg border', stat.color]">
-              {{ stat.icon }}
+            <div :class="['p-3 rounded-lg border', stat.color]">
+              <component :is="stat.icon" class="w-8 h-8" />
             </div>
           </div>
         </Card>
