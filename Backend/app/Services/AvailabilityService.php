@@ -23,13 +23,23 @@ class AvailabilityService
     /**
      * Get available time slots for a specific date and service
      */
-    public function getAvailableSlots(string $date, ?int $serviceId = null): array
+    public function getAvailableSlots(string $date, ?int $serviceId = null, ?int $barberId = null): array
     {
         $service = $serviceId ? Service::find($serviceId) : null;
         $serviceDuration = $service ? $service->duration_minutes : 30;
 
+        // If no barber specified, get first active barber
+        if (!$barberId) {
+            $barber = \App\Models\Barber::where('active', true)->first();
+            $barberId = $barber?->id;
+        }
+
+        if (!$barberId) {
+            return []; // No barbers available
+        }
+
         $allSlots = $this->generateAllTimeSlots();
-        $existingAppointments = $this->getActiveAppointmentsForDate($date);
+        $existingAppointments = $this->getActiveAppointmentsForDate($date, $barberId);
 
         $availableSlots = [];
 
@@ -65,10 +75,14 @@ class AvailabilityService
     /**
      * Get all active appointments for a specific date
      */
-    private function getActiveAppointmentsForDate(string $date): Collection
+    private function getActiveAppointmentsForDate(string $date, int $barberId): Collection
     {
+        $startOfDay = Carbon::parse($date)->startOfDay();
+        $endOfDay = Carbon::parse($date)->endOfDay();
+
         return Appointment::with('service')
-            ->where('date', $date)
+            ->where('barber_id', $barberId)
+            ->whereBetween('starts_at', [$startOfDay, $endOfDay])
             ->whereIn('status', ['PENDING', 'CONFIRMED'])
             ->get();
     }
@@ -86,8 +100,8 @@ class AvailabilityService
         $slotEnd = $slotStart->copy()->addMinutes($serviceDuration);
 
         foreach ($existingAppointments as $appointment) {
-            $appointmentStart = Carbon::createFromFormat('Y-m-d H:i:s', "{$appointment->date} {$appointment->time}");
-            $appointmentEnd = $appointmentStart->copy()->addMinutes($appointment->service->duration_minutes);
+            $appointmentStart = Carbon::parse($appointment->starts_at);
+            $appointmentEnd = Carbon::parse($appointment->ends_at);
 
             // Check for overlap: slot overlaps with appointment if:
             // - slot starts before appointment ends AND
@@ -103,17 +117,23 @@ class AvailabilityService
     /**
      * Validate if a specific time slot is available for booking
      */
-    public function validateSlotAvailability(string $date, string $time, int $serviceId): bool
+    public function validateSlotAvailability(string $date, string $time, int $serviceId, ?int $barberId = null): bool
     {
         $service = Service::findOrFail($serviceId);
-        $availableSlots = $this->getAvailableSlots($date, $serviceId);
 
-        foreach ($availableSlots as $slot) {
-            if ($slot['time'] === $time && $slot['available']) {
-                return true;
-            }
+        // Resolve barber id (fallback to first active barber)
+        if (!$barberId) {
+            $barber = \App\Models\Barber::where('active', true)->first();
+            $barberId = $barber?->id;
+        }
+        if (!$barberId) {
+            return false;
         }
 
-        return false;
+        // Build the same availability check used for listings, but scoped to one time
+        $existingAppointments = $this->getActiveAppointmentsForDate($date, $barberId);
+        $serviceDuration = $service->duration_minutes ?? (int) config('app.slot_interval_minutes', 30);
+
+        return $this->isSlotAvailable($time, $serviceDuration, $date, $existingAppointments);
     }
 }

@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import BaseButton from '@/components/BaseButton.vue'
 import Card from '@/components/Card.vue'
-import { fetchBookingById } from '@/services/bookingsService'
+import { fetchBookingByCode } from '@/services/bookingsService'
 import { formatDate } from '@/utils/dateHelpers'
 
 const route = useRoute()
@@ -12,16 +12,16 @@ const loading = ref(true)
 const error = ref(null)
 
 onMounted(async () => {
-  const bookingId = route.query.id
+  const bookingCode = route.query.code
 
-  if (!bookingId) {
-    error.value = 'No se encontró el ID de la reserva'
+  if (!bookingCode) {
+    error.value = 'No se encontró el código de la reserva'
     loading.value = false
     return
   }
 
   try {
-    booking.value = await fetchBookingById(bookingId)
+    booking.value = await fetchBookingByCode(bookingCode)
   } catch (err) {
     error.value = 'No se pudo cargar la información de la reserva'
     console.error(err)
@@ -82,12 +82,12 @@ onMounted(async () => {
           
           <div class="flex justify-between items-center py-3 border-b border-dark-700">
             <span class="text-gray-400">Fecha:</span>
-            <span class="text-white font-semibold">{{ formatDate(booking.date) }}</span>
+            <span class="text-white font-semibold">{{ booking.date ? formatDate(booking.date) : 'N/A' }}</span>
           </div>
           
           <div class="flex justify-between items-center py-3 border-b border-dark-700">
             <span class="text-gray-400">Hora:</span>
-            <span class="text-white font-semibold">{{ booking.time }}</span>
+            <span class="text-white font-semibold">{{ booking.time || 'N/A' }}</span>
           </div>
           
           <div class="flex justify-between items-center py-3 border-b border-dark-700">

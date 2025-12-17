@@ -13,22 +13,30 @@ class Appointment extends Model
 
     protected $fillable = [
         'public_code',
-        'customer_name',
-        'phone',
+        'client_name',
+        'client_phone',
+        'client_email',
+        'barber_id',
         'service_id',
-        'date',
-        'time',
+        'starts_at',
+        'ends_at',
         'notes',
         'status',
     ];
 
     protected $casts = [
-        'date' => 'date',
+        'starts_at' => 'datetime',
+        'ends_at' => 'datetime',
     ];
 
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
+    }
+
+    public function barber(): BelongsTo
+    {
+        return $this->belongsTo(Barber::class);
     }
 
     public static function generatePublicCode(): string

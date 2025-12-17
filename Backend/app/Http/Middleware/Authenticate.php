@@ -9,9 +9,11 @@ class Authenticate extends Middleware
 {
     /**
      * Get the path the user should be redirected to when they are not authenticated.
+     * Compatible with Laravel 8 signature.
      */
-    protected function redirectTo(Request $request): ?string
+    protected function redirectTo($request)
     {
-        return $request->expectsJson() ? null : route('login');
+        // API returns JSON; for non-JSON just return null (no web login route).
+        return $request->expectsJson() ? null : null;
     }
 }

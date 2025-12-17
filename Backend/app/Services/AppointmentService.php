@@ -24,24 +24,38 @@ class AppointmentService
         // Validate service exists and is active
         $service = Service::active()->findOrFail($data['service_id']);
 
+        // Get barber from request or first active barber
+        $barberId = $data['barber_id'] ?? null;
+        if ($barberId) {
+            $barber = \App\Models\Barber::where('active', true)->findOrFail($barberId);
+        } else {
+            $barber = \App\Models\Barber::where('active', true)->firstOrFail();
+        }
+
         // Validate slot availability
         if (!$this->availabilityService->validateSlotAvailability(
             $data['date'],
             $data['time'],
-            $data['service_id']
+            $data['service_id'],
+            $barber->id
         )) {
             throw new \Exception('El horario seleccionado ya no está disponible');
         }
 
         // Create appointment with generated public code
-        $appointment = DB::transaction(function () use ($data) {
+        $appointment = DB::transaction(function () use ($data, $service, $barber) {
+            $startsAt = \Carbon\Carbon::parse($data['date'] . ' ' . $data['time']);
+            $endsAt = $startsAt->copy()->addMinutes($service->duration_minutes);
+
             return Appointment::create([
                 'public_code' => Appointment::generatePublicCode(),
-                'customer_name' => $data['customer_name'],
-                'phone' => $data['phone'],
+                'client_name' => $data['client_name'],
+                'client_phone' => $data['client_phone'],
+                'client_email' => $data['client_email'] ?? null,
+                'barber_id' => $barber->id,
                 'service_id' => $data['service_id'],
-                'date' => $data['date'],
-                'time' => $data['time'],
+                'starts_at' => $startsAt,
+                'ends_at' => $endsAt,
                 'notes' => $data['notes'] ?? null,
                 'status' => 'PENDING',
             ]);
@@ -50,10 +64,11 @@ class AppointmentService
         Log::info('New appointment created', [
             'appointment_id' => $appointment->id,
             'public_code' => $appointment->public_code,
-            'customer' => $appointment->customer_name,
+            'client' => $appointment->client_name,
         ]);
 
-        return $appointment->load('service');
+        // Load related models; Barber has no 'user' relation in current model
+        return $appointment->load(['service', 'barber']);
     }
 
     /**
@@ -104,7 +119,7 @@ class AppointmentService
      */
     public function getAppointmentByPublicCode(string $publicCode): ?Appointment
     {
-        return Appointment::with('service')
+        return Appointment::with(['service', 'barber'])
             ->where('public_code', $publicCode)
             ->first();
     }
@@ -114,18 +129,18 @@ class AppointmentService
      */
     public function getFilteredAppointments(array $filters = [])
     {
-        $query = Appointment::with('service')->orderBy('date', 'desc')->orderBy('time', 'desc');
+        $query = Appointment::with(['service', 'barber'])->orderBy('starts_at', 'desc');
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
         if (isset($filters['from'])) {
-            $query->where('date', '>=', $filters['from']);
+            $query->whereDate('starts_at', '>=', $filters['from']);
         }
 
         if (isset($filters['to'])) {
-            $query->where('date', '<=', $filters['to']);
+            $query->whereDate('starts_at', '<=', $filters['to']);
         }
 
         return $query->paginate(20);

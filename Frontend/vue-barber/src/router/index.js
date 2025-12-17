@@ -59,6 +59,22 @@ const routes = [
         path: 'bookings/:id',
         name: 'AdminBookingDetail',
         component: () => import('@/pages/admin/BookingDetailPage.vue')
+      },
+      {
+        path: 'services',
+        name: 'AdminServices',
+        component: () => import('@/pages/admin/ServicesPage.vue')
+      }
+      ,
+      {
+        path: 'barbers',
+        name: 'admin-barbers',
+        component: () => import('@/pages/admin/AdminBarbersList.vue')
+      },
+      {
+        path: 'barbers/:id',
+        name: 'admin-barber-detail',
+        component: () => import('@/pages/admin/AdminBarberDetail.vue')
       }
     ]
   }
@@ -76,11 +92,12 @@ const router = createRouter({
 })
 
 // Navigation guard
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const { checkAuth } = useAuth()
   
   if (to.meta.requiresAuth) {
-    if (checkAuth()) {
+    const isAuth = await checkAuth()
+    if (isAuth) {
       next()
     } else {
       next('/admin/login')

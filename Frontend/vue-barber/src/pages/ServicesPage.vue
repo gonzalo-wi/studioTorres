@@ -1,43 +1,35 @@
 <script setup>
+import { ref, onMounted } from 'vue'
 import Card from '@/components/Card.vue'
 import { RouterLink } from 'vue-router'
 import BaseButton from '@/components/BaseButton.vue'
+import { fetchServices } from '@/services/servicesService'
 
-const services = [
-  {
-    id: 'corte',
-    name: 'Corte de Cabello',
-    duration: 30,
-    price: '$3500',
-    description: 'Corte personalizado según tu estilo. Incluye lavado, corte y terminación con secador.',
-    features: ['Corte personalizado', 'Terminación', 'Productos premium']
-  },
-  {
-    id: 'corte-barba',
-    name: 'Corte + Barba',
-    duration: 60,
-    price: '$5500',
-    description: 'Servicio completo: corte de cabello + perfilado y arreglo de barba profesional.',
-    features: ['Corte personalizado', 'Perfilado de barba', 'Productos premium'],
-    featured: true
-  },
-  {
-    id: 'barba',
-    name: 'Arreglo de Barba',
-    duration: 30,
-    price: '$2500',
-    description: 'Perfilado, recorte y arreglo profesional de barba con productos de calidad.',
-    features: ['Perfilado profesional', 'Recorte', 'Productos premium']
-  },
-  {
-    id: 'afeitado',
-    name: 'Afeitado Tradicional',
-    duration: 30,
-    price: '$3000',
-    description: 'Experiencia de barbería clásica con toalla caliente y afeitado con navaja.',
-    features: ['Toalla caliente', 'Afeitado con navaja', 'Tratamiento post-afeitado']
+const services = ref([])
+const loading = ref(true)
+const error = ref(null)
+
+onMounted(async () => {
+  try {
+    loading.value = true
+    const data = await fetchServices()
+    services.value = data
+  } catch (err) {
+    console.error('Error loading services:', err)
+    error.value = 'No se pudieron cargar los servicios. Por favor, intentá nuevamente.'
+  } finally {
+    loading.value = false
   }
-]
+})
+
+// Helper function to format price
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 0
+  }).format(price)
+}
 </script>
 
 <template>
@@ -54,15 +46,31 @@ const services = [
         </p>
       </div>
 
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+        <p class="text-gray-400 mt-4">Cargando servicios...</p>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="error" class="max-w-2xl mx-auto">
+        <Card class="p-8 text-center">
+          <p class="text-red-400 mb-4">{{ error }}</p>
+          <BaseButton @click="() => window.location.reload()">
+            Reintentar
+          </BaseButton>
+        </Card>
+      </div>
+
       <!-- Services Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto mb-12">
+      <div v-else-if="services.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto mb-12">
         <div
           v-for="service in services"
           :key="service.id"
           class="relative"
         >
-          <!-- Featured Badge - Fuera de la tarjeta -->
-          <div v-if="service.featured" class="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
+          <!-- Featured Badge -->
+          <div v-if="service.is_featured" class="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
             <span class="bg-primary-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
               MÁS POPULAR
             </span>
@@ -71,7 +79,7 @@ const services = [
           <Card
             hover
             :class="[
-              service.featured && 'ring-2 ring-primary-600'
+              service.is_featured && 'ring-2 ring-primary-600'
             ]"
           >
             <div class="p-6">
@@ -79,12 +87,12 @@ const services = [
               <div class="flex justify-between items-start mb-4">
                 <div class="flex-1">
                   <h3 class="text-2xl font-display font-bold text-white mb-1">
-                    {{ service.name }}
+                    {{ service.title }}
                   </h3>
-                  <p class="text-gray-400 text-sm">{{ service.duration }} minutos</p>
+                  <p class="text-gray-400 text-sm">{{ service.duration_minutes }} minutos</p>
                 </div>
                 <div class="text-right ml-4">
-                  <p class="text-3xl font-bold text-primary-500">{{ service.price }}</p>
+                  <p class="text-3xl font-bold text-primary-500">{{ formatPrice(service.price) }}</p>
                 </div>
               </div>
 
@@ -93,22 +101,8 @@ const services = [
               {{ service.description }}
             </p>
 
-            <!-- Features -->
-            <ul class="space-y-2 mb-6">
-              <li
-                v-for="(feature, index) in service.features"
-                :key="index"
-                class="flex items-center text-gray-300 text-sm"
-              >
-                <svg class="w-5 h-5 text-primary-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-                {{ feature }}
-              </li>
-            </ul>
-
             <!-- CTA -->
-            <RouterLink to="/book" class="block">
+            <RouterLink :to="{ name: 'Book', query: { service: service.id } }" class="block">
               <BaseButton full-width>
                 Reservar este servicio
               </BaseButton>
@@ -116,6 +110,13 @@ const services = [
           </div>
         </Card>
         </div>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else class="max-w-2xl mx-auto">
+        <Card class="p-8 text-center">
+          <p class="text-gray-400">No hay servicios disponibles en este momento.</p>
+        </Card>
       </div>
 
       <!-- Info Section -->

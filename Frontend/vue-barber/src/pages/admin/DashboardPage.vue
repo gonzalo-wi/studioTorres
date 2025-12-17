@@ -1,11 +1,11 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import Card from '@/components/Card.vue'
 import BadgeStatus from '@/components/BadgeStatus.vue'
-import { getBookingStats, fetchBookings } from '@/services/bookingsService'
+import { getBookingStats, getMonthlyStats, fetchBookings } from '@/services/bookingsService'
 import { formatDate } from '@/utils/dateHelpers'
-import { CalendarDaysIcon, ClockIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/outline'
+import { CalendarDaysIcon, ClockIcon, CheckCircleIcon, XCircleIcon, CurrencyDollarIcon, ChartBarIcon } from '@heroicons/vue/24/outline'
 
 const stats = ref({
   today: 0,
@@ -15,18 +15,40 @@ const stats = ref({
   total: 0
 })
 
+const monthlyData = ref([])
 const todayBookings = ref([])
 const loading = ref(true)
+const selectedMonth = ref(new Date().toISOString().split('T')[0].substring(0, 7))
+
+const loadBookingsForMonth = async () => {
+  try {
+    // Obtener primer y último día del mes seleccionado
+    const [year, month] = selectedMonth.value.split('-')
+    const firstDay = new Date(year, month - 1, 1).toISOString().split('T')[0]
+    const lastDay = new Date(year, month, 0).toISOString().split('T')[0]
+    
+    const bookingsData = await fetchBookings({ 
+      from: firstDay,
+      to: lastDay
+    })
+    todayBookings.value = bookingsData
+  } catch (error) {
+    console.error('Error cargando turnos:', error)
+  }
+}
+
+watch(selectedMonth, loadBookingsForMonth)
 
 onMounted(async () => {
   try {
-    const [statsData, bookingsData] = await Promise.all([
+    const [statsData, monthly] = await Promise.all([
       getBookingStats(),
-      fetchBookings({ date: new Date().toISOString().split('T')[0] })
+      getMonthlyStats()
     ])
     
     stats.value = statsData
-    todayBookings.value = bookingsData
+    monthlyData.value = monthly
+    await loadBookingsForMonth()
   } catch (error) {
     console.error('Error cargando dashboard:', error)
   } finally {
@@ -37,40 +59,56 @@ onMounted(async () => {
 const statCards = computed(() => [
   {
     label: 'Turnos Hoy',
-    value: stats.value.today,
+    value: stats.value.today_appointments || 0,
     icon: CalendarDaysIcon,
     color: 'bg-blue-500/10 text-blue-500 border-blue-500/20'
   },
   {
     label: 'Pendientes',
-    value: stats.value.pending,
+    value: stats.value.pending || 0,
     icon: ClockIcon,
     color: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
   },
   {
     label: 'Confirmados',
-    value: stats.value.confirmed,
+    value: stats.value.confirmed || 0,
     icon: CheckCircleIcon,
     color: 'bg-green-500/10 text-green-500 border-green-500/20'
   },
   {
-    label: 'Cancelados',
-    value: stats.value.cancelled,
+    label: 'Cancelados Hoy',
+    value: stats.value.cancelled_today || 0,
     icon: XCircleIcon,
     color: 'bg-red-500/10 text-red-500 border-red-500/20'
   }
 ])
+
+const totalMonthlyRevenue = computed(() => {
+  return monthlyData.value.reduce((sum, month) => sum + (month.revenue || 0), 0)
+})
+
+const totalMonthlyAppointments = computed(() => {
+  return monthlyData.value.reduce((sum, month) => sum + (month.total || 0), 0)
+})
+
+const maxRevenue = computed(() => {
+  return Math.max(...monthlyData.value.map(m => m.revenue || 0), 1)
+})
+
+const maxAppointments = computed(() => {
+  return Math.max(...monthlyData.value.map(m => m.total || 0), 1)
+})
 </script>
 
 <template>
-  <div>
+  <div class="min-h-screen bg-black px-4 py-6 md:px-6 md:py-8">
     <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-display font-bold text-white mb-2">
+    <div class="mb-6 md:mb-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">
         Dashboard
       </h1>
-      <p class="text-gray-400">
-        Resumen general de las reservas
+      <p class="text-gray-400 text-sm md:text-base">
+        Resumen general y estadísticas del negocio
       </p>
     </div>
 
@@ -81,96 +119,266 @@ const statCards = computed(() => [
     </div>
 
     <!-- Content -->
-    <div v-else>
+    <div v-else class="space-y-8">
       <!-- Stats Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <Card
           v-for="stat in statCards"
           :key="stat.label"
-          class="p-6"
+          class="p-4 md:p-6 hover:border-red-600 transition-all duration-300"
         >
           <div class="flex items-start justify-between">
             <div>
-              <p class="text-gray-400 text-sm mb-2">{{ stat.label }}</p>
-              <p class="text-4xl font-bold text-white">{{ stat.value }}</p>
+              <p class="text-gray-400 text-xs md:text-sm mb-2">{{ stat.label }}</p>
+              <p class="text-3xl md:text-4xl font-bold text-white">{{ stat.value }}</p>
             </div>
-            <div :class="['p-3 rounded-lg border', stat.color]">
-              <component :is="stat.icon" class="w-8 h-8" />
+            <div :class="['p-2 md:p-3 rounded-lg border', stat.color]">
+              <component :is="stat.icon" class="w-6 h-6 md:w-8 md:h-8" />
             </div>
           </div>
         </Card>
       </div>
 
-      <!-- Today's Bookings -->
-      <Card>
-        <div class="p-6 border-b border-dark-800">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-display font-bold text-white">
-              Turnos de Hoy
-            </h2>
-            <RouterLink
-              to="/admin/bookings"
-              class="text-primary-500 hover:text-primary-400 text-sm font-semibold"
-            >
-              Ver todos →
-            </RouterLink>
+      <!-- Monthly Stats Section -->
+      <div class="grid lg:grid-cols-2 gap-6 md:gap-8">
+        <!-- Appointments Chart -->
+        <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-2xl">
+          <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 md:px-6 md:py-4">
+            <div class="flex items-center gap-2 md:gap-3">
+              <ChartBarIcon class="w-5 h-5 md:w-6 md:h-6 text-white" />
+              <div>
+                <h2 class="text-lg md:text-xl font-bold text-white">Turnos por Mes</h2>
+                <p class="text-blue-100 text-xs md:text-sm">Últimos 6 meses</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-4 md:p-6">
+            <div class="mb-6 text-center">
+              <div class="text-4xl font-bold text-white">{{ totalMonthlyAppointments }}</div>
+              <div class="text-gray-400 text-sm">turnos totales</div>
+            </div>
+            
+            <div class="space-y-4">
+              <div v-for="month in monthlyData" :key="month.month" class="space-y-2">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-gray-300 font-medium">{{ month.label }}</span>
+                  <span class="text-white font-bold">{{ month.total }}</span>
+                </div>
+                <div class="relative h-8 bg-gray-800 rounded-full overflow-hidden">
+                  <div 
+                    class="absolute h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500"
+                    :style="{ width: `${(month.total / maxAppointments) * 100}%` }"
+                  ></div>
+                  <div class="absolute inset-0 flex items-center px-3 text-xs">
+                    <span class="text-white font-semibold">
+                      {{ month.confirmed }} confirmados
+                    </span>
+                    <span class="ml-auto text-gray-300">
+                      {{ month.pending }} pendientes
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div v-if="todayBookings.length > 0" class="divide-y divide-dark-800">
+        <!-- Revenue Chart -->
+        <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-2xl">
+          <div class="bg-gradient-to-r from-green-600 to-green-700 px-4 py-3 md:px-6 md:py-4">
+            <div class="flex items-center gap-2 md:gap-3">
+              <CurrencyDollarIcon class="w-5 h-5 md:w-6 md:h-6 text-white" />
+              <div>
+                <h2 class="text-lg md:text-xl font-bold text-white">Ingresos por Mes</h2>
+                <p class="text-green-100 text-xs md:text-sm">Últimos 6 meses</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-4 md:p-6">
+            <div class="mb-6 text-center">
+              <div class="text-4xl font-bold text-green-400">${{ totalMonthlyRevenue.toFixed(2) }}</div>
+              <div class="text-gray-400 text-sm">ingresos totales</div>
+            </div>
+            
+            <div class="space-y-4">
+              <div v-for="month in monthlyData" :key="month.month" class="space-y-2">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-gray-300 font-medium">{{ month.label }}</span>
+                  <span class="text-green-400 font-bold">${{ month.revenue?.toFixed(2) || '0.00' }}</span>
+                </div>
+                <div class="relative h-8 bg-gray-800 rounded-full overflow-hidden">
+                  <div 
+                    class="absolute h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-500"
+                    :style="{ width: `${(month.revenue / maxRevenue) * 100}%` }"
+                  ></div>
+                  <div class="absolute inset-0 flex items-center px-3 text-xs">
+                    <span class="text-white font-semibold">
+                      {{ month.confirmed }} servicios
+                    </span>
+                    <span class="ml-auto text-gray-300">
+                      ${{ (month.confirmed > 0 ? month.revenue / month.confirmed : 0).toFixed(2) }} promedio
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bookings Section -->
+      <Card class="overflow-hidden">
+        <div class="bg-gradient-to-r from-red-600 to-red-700 px-4 py-3 md:px-6 md:py-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
+            <div class="flex items-center gap-2 md:gap-3">
+              <CalendarDaysIcon class="w-5 h-5 md:w-6 md:h-6 text-white flex-shrink-0" />
+              <div>
+                <h2 class="text-lg md:text-xl font-bold text-white">Turnos del Mes</h2>
+                <p class="text-red-100 text-xs md:text-sm">{{ todayBookings.length }} turnos programados</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 md:gap-3">
+              <input 
+                v-model="selectedMonth" 
+                type="month" 
+                class="bg-white/10 border border-white/20 text-white text-sm py-2 px-3 md:px-4 rounded-lg focus:ring-2 focus:ring-white/50 focus:border-transparent transition"
+              />
+              <RouterLink
+                to="/admin/bookings"
+                class="bg-white/10 hover:bg-white/20 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition whitespace-nowrap"
+              >
+                Ver todos →
+              </RouterLink>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Desktop -->
+        <div v-if="todayBookings.length > 0" class="hidden md:block overflow-x-auto">
+          <table class="min-w-full">
+            <thead>
+              <tr class="bg-gray-800/50 text-gray-400 text-xs uppercase tracking-wider">
+                <th class="py-3 px-4 text-left w-32">Fecha</th>
+                <th class="py-3 px-4 text-left w-20">Hora</th>
+                <th class="py-3 px-4 text-left min-w-[150px]">Cliente</th>
+                <th class="py-3 px-4 text-left w-32">Teléfono</th>
+                <th class="py-3 px-4 text-left min-w-[120px]">Servicio</th>
+                <th class="py-3 px-4 text-left min-w-[120px]">Barbero</th>
+                <th class="py-3 px-4 text-left w-32">Estado</th>
+                <th class="py-3 px-4 text-left w-12"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800">
+              <tr 
+                v-for="booking in todayBookings"
+                :key="booking.id"
+                class="hover:bg-gray-900 transition-colors"
+              >
+                <td class="py-4 px-4 text-gray-300">{{ booking.date }}</td>
+                <td class="py-4 px-4 text-gray-300 font-mono">{{ booking.time }}</td>
+                <td class="py-4 px-4 text-white font-semibold">{{ booking.name }}</td>
+                <td class="py-4 px-4 text-gray-400 text-sm">{{ booking.phone }}</td>
+                <td class="py-4 px-4 text-gray-300">{{ booking.serviceName }}</td>
+                <td class="py-4 px-4 text-gray-300">{{ booking.barberName }}</td>
+                <td class="py-4 px-4">
+                  <BadgeStatus :status="booking.status" />
+                </td>
+                <td class="py-4 px-4">
+                  <RouterLink :to="`/admin/bookings/${booking.id}`" class="text-red-500 hover:text-red-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </RouterLink>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Cards Mobile -->
+        <div v-if="todayBookings.length > 0" class="md:hidden space-y-3 p-4">
           <RouterLink
             v-for="booking in todayBookings"
             :key="booking.id"
             :to="`/admin/bookings/${booking.id}`"
-            class="block p-6 hover:bg-dark-800 transition-colors"
+            class="block bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg p-4 transition-colors"
           >
-            <div class="flex items-center justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-3 mb-2">
-                  <h3 class="text-white font-semibold">{{ booking.name }}</h3>
-                  <BadgeStatus :status="booking.status" />
-                </div>
-                <div class="text-sm text-gray-400 space-x-4">
-                  <span>🕐 {{ booking.time }}</span>
-                  <span>✂️ {{ booking.serviceName }}</span>
-                  <span>📞 {{ booking.phone }}</span>
-                </div>
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <div class="text-white font-semibold text-lg mb-1">{{ booking.name }}</div>
+                <div class="text-gray-400 text-sm">{{ booking.phone }}</div>
               </div>
-              <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
+              <BadgeStatus :status="booking.status" />
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <div class="text-gray-500 text-xs uppercase mb-1">Fecha</div>
+                <div class="text-gray-300">{{ booking.date }}</div>
+              </div>
+              <div>
+                <div class="text-gray-500 text-xs uppercase mb-1">Hora</div>
+                <div class="text-gray-300 font-mono">{{ booking.time }}</div>
+              </div>
+              <div>
+                <div class="text-gray-500 text-xs uppercase mb-1">Servicio</div>
+                <div class="text-gray-300">{{ booking.serviceName }}</div>
+              </div>
+              <div>
+                <div class="text-gray-500 text-xs uppercase mb-1">Barbero</div>
+                <div class="text-gray-300">{{ booking.barberName }}</div>
+              </div>
             </div>
           </RouterLink>
         </div>
 
-        <div v-else class="p-12 text-center">
+        <div v-else class="p-8 md:p-12 text-center bg-gray-900">
           <div class="text-5xl mb-4">📭</div>
-          <p class="text-gray-400">No hay turnos para hoy</p>
+          <p class="text-gray-400">No hay turnos programados para hoy</p>
+          <RouterLink to="/admin/bookings" class="inline-block mt-4 text-red-500 hover:text-red-400 font-semibold">
+            Ver todos los turnos →
+          </RouterLink>
         </div>
       </Card>
 
       <!-- Quick Actions -->
-      <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card hover clickable class="p-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card hover clickable class="p-6 bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700">
           <RouterLink to="/admin/bookings" class="block">
             <div class="flex items-center space-x-4">
-              <div class="text-4xl">📋</div>
+              <div class="text-5xl">📋</div>
               <div>
-                <h3 class="text-white font-semibold mb-1">Gestionar Turnos</h3>
+                <h3 class="text-white font-semibold text-lg mb-1">Gestionar Turnos</h3>
                 <p class="text-gray-400 text-sm">Ver, confirmar y cancelar reservas</p>
               </div>
             </div>
           </RouterLink>
         </Card>
 
-        <Card hover class="p-6 opacity-50 cursor-not-allowed">
-          <div class="flex items-center space-x-4">
-            <div class="text-4xl">📊</div>
-            <div>
-              <h3 class="text-white font-semibold mb-1">Reportes</h3>
-              <p class="text-gray-400 text-sm">Próximamente disponible</p>
+        <Card hover clickable class="p-6 bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700">
+          <RouterLink to="/admin/barbers" class="block">
+            <div class="flex items-center space-x-4">
+              <div class="text-5xl">💈</div>
+              <div>
+                <h3 class="text-white font-semibold text-lg mb-1">Barberos</h3>
+                <p class="text-gray-400 text-sm">Administrar barberos y horarios</p>
+              </div>
             </div>
-          </div>
+          </RouterLink>
+        </Card>
+
+        <Card hover clickable class="p-6 bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700">
+          <RouterLink to="/admin/services" class="block">
+            <div class="flex items-center space-x-4">
+              <div class="text-5xl">✂️</div>
+              <div>
+                <h3 class="text-white font-semibold text-lg mb-1">Servicios</h3>
+                <p class="text-gray-400 text-sm">Gestionar servicios y precios</p>
+              </div>
+            </div>
+          </RouterLink>
         </Card>
       </div>
     </div>

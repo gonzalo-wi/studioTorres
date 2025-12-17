@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('services', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('title');
             $table->text('description')->nullable();
             $table->unsignedInteger('duration_minutes'); // 30 or 60
             $table->decimal('price', 10, 2);

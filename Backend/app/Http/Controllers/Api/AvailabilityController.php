@@ -22,14 +22,16 @@ class AvailabilityController extends Controller
     {
         $request->validate([
             'date' => 'required|date|after_or_equal:today',
-            'service_id' => 'nullable|exists:services,id',
+            'service_id' => 'required|exists:services,id',
+            'barber_id' => 'nullable|exists:barbers,id',
         ]);
 
         $date = $request->input('date');
         $serviceId = $request->input('service_id');
+        $barberId = $request->input('barber_id');
 
         try {
-            $slots = $this->availabilityService->getAvailableSlots($date, $serviceId);
+            $slots = $this->availabilityService->getAvailableSlots($date, $serviceId, $barberId);
 
             return $this->success([
                 'date' => $date,

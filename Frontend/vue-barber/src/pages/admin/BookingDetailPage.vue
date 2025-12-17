@@ -5,7 +5,7 @@ import BaseButton from '@/components/BaseButton.vue'
 import Card from '@/components/Card.vue'
 import BadgeStatus from '@/components/BadgeStatus.vue'
 import Modal from '@/components/Modal.vue'
-import { fetchBookingById, updateBooking, confirmBooking, cancelBooking } from '@/services/bookingsService'
+import { fetchBookingById, updateBookingStatus, confirmBooking, cancelBooking } from '@/services/bookingsService'
 import { formatDate } from '@/utils/dateHelpers'
 import { CheckCircleIcon, XCircleIcon, PhoneIcon, ChatBubbleLeftIcon, ClockIcon } from '@heroicons/vue/24/outline'
 

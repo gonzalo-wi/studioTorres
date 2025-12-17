@@ -10,6 +10,13 @@
       0 => 'Facade\\Ignition\\IgnitionServiceProvider',
     ),
   ),
+  'fruitcake/laravel-cors' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Fruitcake\\Cors\\CorsServiceProvider',
+    ),
+  ),
   'laravel/sail' => 
   array (
     'providers' => 

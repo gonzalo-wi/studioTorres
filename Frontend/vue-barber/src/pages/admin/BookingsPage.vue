@@ -5,12 +5,13 @@ import Card from '@/components/Card.vue'
 import BadgeStatus from '@/components/BadgeStatus.vue'
 import BaseSelect from '@/components/BaseSelect.vue'
 import BaseInput from '@/components/BaseInput.vue'
-import { fetchBookings, getAllServices } from '@/services/bookingsService'
+import { fetchBookings, fetchServices } from '@/services/bookingsService'
 import { formatDate } from '@/utils/dateHelpers'
 import { ClockIcon } from '@heroicons/vue/24/outline'
 
 const bookings = ref([])
 const loading = ref(true)
+const services = ref([])
 
 // Filtros
 const filters = ref({
@@ -20,19 +21,18 @@ const filters = ref({
   search: ''
 })
 
-const services = getAllServices()
 const statusOptions = [
   { value: '', label: 'Todos los estados' },
   { value: 'PENDING', label: 'Pendiente' },
   { value: 'CONFIRMED', label: 'Confirmado' },
   { value: 'CANCELLED', label: 'Cancelado' },
-  { value: 'RESCHEDULED', label: 'Reprogramado' }
+  { value: 'DONE', label: 'Completado' }
 ]
 
-const serviceOptions = [
+const serviceOptions = computed(() => [
   { value: '', label: 'Todos los servicios' },
-  ...services.map(s => ({ value: s.id, label: s.name }))
-]
+  ...services.value.map(s => ({ value: s.id, label: s.title }))
+])
 
 // Filtrado de bookings
 const filteredBookings = computed(() => {
@@ -72,7 +72,14 @@ const filteredBookings = computed(() => {
 const loadBookings = async () => {
   loading.value = true
   try {
-    bookings.value = await fetchBookings()
+    const [bookingsData, servicesData] = await Promise.all([
+      fetchBookings(),
+      services.value.length === 0 ? fetchServices() : Promise.resolve(services.value)
+    ])
+    bookings.value = bookingsData
+    if (servicesData && servicesData.length > 0) {
+      services.value = servicesData
+    }
   } catch (error) {
     console.error('Error cargando turnos:', error)
   } finally {
@@ -162,6 +169,7 @@ onMounted(() => {
               <th class="text-left p-4 text-gray-400 text-sm font-semibold">Fecha</th>
               <th class="text-left p-4 text-gray-400 text-sm font-semibold">Hora</th>
               <th class="text-left p-4 text-gray-400 text-sm font-semibold">Servicio</th>
+              <th class="text-left p-4 text-gray-400 text-sm font-semibold">Barbero</th>
               <th class="text-left p-4 text-gray-400 text-sm font-semibold">Estado</th>
               <th class="text-left p-4 text-gray-400 text-sm font-semibold">Acciones</th>
             </tr>
@@ -182,6 +190,7 @@ onMounted(() => {
               </td>
               <td class="p-4 text-white font-semibold">{{ booking.time }}</td>
               <td class="p-4 text-gray-300 text-sm">{{ booking.serviceName }}</td>
+              <td class="p-4 text-gray-300 text-sm">{{ booking.barberName }}</td>
               <td class="p-4">
                 <BadgeStatus :status="booking.status" />
               </td>
@@ -225,7 +234,10 @@ onMounted(() => {
             </div>
           </div>
           
-          <p class="text-gray-300 text-sm">{{ booking.serviceName }}</p>
+          <div class="space-y-1">
+            <p class="text-gray-300 text-sm">{{ booking.serviceName }}</p>
+            <p class="text-gray-400 text-sm">👤 {{ booking.barberName }}</p>
+          </div>
         </RouterLink>
       </div>
     </Card>

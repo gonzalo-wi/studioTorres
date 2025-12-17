@@ -3,29 +3,39 @@ import { validatePhone, validateName } from '@/utils/validators'
 
 export function useBookingForm() {
   const formData = ref({
-    service: '',
+    service_id: '',
+    barber_id: '',
     date: '',
     time: '',
-    name: '',
-    phone: '',
-    observations: ''
+    client_name: '',
+    client_phone: '',
+    client_email: '',
+    notes: ''
   })
 
   const errors = ref({
-    service: '',
+    service_id: '',
+    barber_id: '',
     date: '',
     time: '',
-    name: '',
-    phone: ''
+    client_name: '',
+    client_phone: '',
+    client_email: ''
   })
 
   const validateField = (field) => {
     errors.value[field] = ''
 
     switch (field) {
-      case 'service':
-        if (!formData.value.service) {
-          errors.value.service = 'Seleccioná un servicio'
+      case 'service_id':
+        if (!formData.value.service_id) {
+          errors.value.service_id = 'Seleccioná un servicio'
+        }
+        break
+      
+      case 'barber_id':
+        if (!formData.value.barber_id) {
+          errors.value.barber_id = 'Seleccioná un barbero'
         }
         break
       
@@ -41,49 +51,63 @@ export function useBookingForm() {
         }
         break
       
-      case 'name':
-        if (!formData.value.name.trim()) {
-          errors.value.name = 'Ingresá tu nombre'
-        } else if (!validateName(formData.value.name)) {
-          errors.value.name = 'El nombre debe tener al menos 2 caracteres'
+      case 'client_name':
+        if (!formData.value.client_name.trim()) {
+          errors.value.client_name = 'Ingresá tu nombre'
+        } else if (!validateName(formData.value.client_name)) {
+          errors.value.client_name = 'El nombre debe tener al menos 2 caracteres'
         }
         break
       
-      case 'phone':
-        if (!formData.value.phone.trim()) {
-          errors.value.phone = 'Ingresá tu teléfono'
-        } else if (!validatePhone(formData.value.phone)) {
-          errors.value.phone = 'Ingresá un teléfono válido (ej: 11 2345 6789)'
+      case 'client_phone':
+        if (!formData.value.client_phone.trim()) {
+          errors.value.client_phone = 'Ingresá tu teléfono'
+        } else if (!validatePhone(formData.value.client_phone)) {
+          errors.value.client_phone = 'Ingresá un teléfono válido (ej: 11 2345 6789)'
+        }
+        break
+      
+      case 'client_email':
+        if (formData.value.client_email && !formData.value.client_email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+          errors.value.client_email = 'Ingresá un email válido'
         }
         break
     }
   }
 
   const validateForm = () => {
-    validateField('service')
+    validateField('service_id')
+    validateField('barber_id')
     validateField('date')
     validateField('time')
-    validateField('name')
-    validateField('phone')
+    validateField('client_name')
+    validateField('client_phone')
+    if (formData.value.client_email) {
+      validateField('client_email')
+    }
 
     return !Object.values(errors.value).some(error => error !== '')
   }
 
   const resetForm = () => {
     formData.value = {
-      service: '',
+      service_id: '',
+      barber_id: '',
       date: '',
       time: '',
-      name: '',
-      phone: '',
-      observations: ''
+      client_name: '',
+      client_phone: '',
+      client_email: '',
+      notes: ''
     }
     errors.value = {
-      service: '',
+      service_id: '',
+      barber_id: '',
       date: '',
       time: '',
-      name: '',
-      phone: ''
+      client_name: '',
+      client_phone: '',
+      client_email: ''
     }
   }
 

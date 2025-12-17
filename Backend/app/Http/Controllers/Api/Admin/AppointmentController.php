@@ -29,6 +29,15 @@ class AppointmentController extends Controller
     }
 
     /**
+     * GET /api/admin/appointments/{id}
+     */
+    public function show(Appointment $appointment)
+    {
+        $appointment->load(['service', 'barber']);
+        return $this->success($appointment);
+    }
+
+    /**
      * PUT /api/admin/appointments/{id}/status
      */
     public function updateStatus(UpdateAppointmentStatusRequest $request, Appointment $appointment)
@@ -58,17 +67,49 @@ class AppointmentController extends Controller
      */
     public function stats()
     {
-        $today = now()->format('Y-m-d');
+        $today = now()->startOfDay();
+        $endOfDay = now()->endOfDay();
         
         $stats = [
-            'today_appointments' => Appointment::where('date', $today)->count(),
+            'today_appointments' => Appointment::whereBetween('starts_at', [$today, $endOfDay])->count(),
             'pending' => Appointment::where('status', 'PENDING')->count(),
             'confirmed' => Appointment::where('status', 'CONFIRMED')->count(),
-            'cancelled_today' => Appointment::where('date', $today)
+            'cancelled_today' => Appointment::whereBetween('starts_at', [$today, $endOfDay])
                 ->where('status', 'CANCELLED')
                 ->count(),
         ];
 
         return $this->success($stats);
+    }
+
+    /**
+     * GET /api/admin/dashboard/monthly-stats
+     */
+    public function monthlyStats()
+    {
+        $currentMonth = now()->startOfMonth();
+        $lastSixMonths = [];
+        
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i)->startOfMonth();
+            $monthEnd = now()->subMonths($i)->endOfMonth();
+            
+            $appointments = Appointment::whereBetween('starts_at', [$month, $monthEnd])->get();
+            
+            $lastSixMonths[] = [
+                'month' => $month->format('Y-m'),
+                'label' => $month->locale('es')->translatedFormat('F Y'),
+                'total' => $appointments->count(),
+                'confirmed' => $appointments->where('status', 'CONFIRMED')->count(),
+                'pending' => $appointments->where('status', 'PENDING')->count(),
+                'cancelled' => $appointments->where('status', 'CANCELLED')->count(),
+                'revenue' => $appointments->where('status', 'CONFIRMED')
+                    ->sum(function($apt) {
+                        return $apt->service->price ?? 0;
+                    })
+            ];
+        }
+        
+        return $this->success($lastSixMonths);
     }
 }

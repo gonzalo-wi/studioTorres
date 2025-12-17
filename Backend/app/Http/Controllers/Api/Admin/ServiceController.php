@@ -10,6 +10,15 @@ use App\Models\Service;
 class ServiceController extends Controller
 {
     /**
+     * GET /api/admin/services
+     */
+    public function index()
+    {
+        $services = Service::orderBy('created_at', 'desc')->get();
+        return $this->success($services);
+    }
+
+    /**
      * POST /api/admin/services
      */
     public function store(StoreServiceRequest $request)

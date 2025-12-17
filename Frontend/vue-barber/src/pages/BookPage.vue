@@ -1,67 +1,120 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseInput from '@/components/BaseInput.vue'
 import BaseSelect from '@/components/BaseSelect.vue'
 import Card from '@/components/Card.vue'
 import { useBookingForm } from '@/composables/useBookingForm'
-import { generateTimeSlots, getTodayDate, getMaxDate, formatDate, isValidBookingDate } from '@/utils/dateHelpers'
-import { getAllServices, fetchBookings, createBooking } from '@/services/bookingsService'
+import { getTodayDate, getMaxDate, formatDate, isValidBookingDate } from '@/utils/dateHelpers'
+import { fetchServices, fetchAvailableSlots, createBooking } from '@/services/bookingsService'
+import { fetchBarbers } from '@/services/barbersService'
 
 const router = useRouter()
+const route = useRoute()
 const { formData, errors, validateField, validateForm, resetForm } = useBookingForm()
 
 const currentStep = ref(1)
 const isSubmitting = ref(false)
-const existingBookings = ref([])
+const services = ref([])
+const barbers = ref([])
 const availableSlots = ref([])
+const loadingSlots = ref(false)
+const preSelectedService = ref(null)
 
-// Servicios
-const services = getAllServices()
-const serviceOptions = services.map(s => ({
-  value: s.id,
-  label: `${s.name} (${s.duration} min) - $${s.price}`
-}))
-
-const selectedService = computed(() => 
-  services.find(s => s.id === formData.value.service)
-)
-
-// Cargar reservas existentes cuando cambia la fecha
-watch(() => formData.value.date, async (newDate) => {
-  if (newDate && formData.value.service) {
-    try {
-      existingBookings.value = await fetchBookings({ date: newDate })
-      updateAvailableSlots()
-    } catch (error) {
-      console.error('Error cargando reservas:', error)
+// Cargar servicios y barberos al montar
+onMounted(async () => {
+  try {
+    services.value = await fetchServices()
+    barbers.value = await fetchBarbers()
+    
+    // Pre-seleccionar servicio si viene en la URL
+    const serviceIdFromQuery = route.query.service
+    if (serviceIdFromQuery) {
+      const serviceId = parseInt(serviceIdFromQuery)
+      const service = services.value.find(s => s.id === serviceId)
+      if (service) {
+        formData.value.service_id = serviceId
+        preSelectedService.value = service
+      }
     }
+  } catch (error) {
+    console.error('Error cargando datos:', error)
   }
 })
 
-// Actualizar slots cuando cambia el servicio o la fecha
-watch([() => formData.value.service, () => formData.value.date], () => {
-  updateAvailableSlots()
-})
+const serviceOptions = computed(() => 
+  services.value.map(s => ({
+    value: s.id,
+    label: `${s.title} (${s.duration_minutes} min) - $${s.price}`
+  }))
+)
 
-const updateAvailableSlots = () => {
-  if (formData.value.date && formData.value.service && selectedService.value) {
-    availableSlots.value = generateTimeSlots(
-      formData.value.date,
-      selectedService.value.duration,
-      existingBookings.value
+const barberOptions = computed(() => 
+  barbers.value.map(b => ({
+    value: b.id,
+    label: b.name
+  }))
+)
+
+const selectedService = computed(() => 
+  services.value.find(s => s.id === formData.value.service_id)
+)
+
+const selectedBarber = computed(() => 
+  barbers.value.find(b => b.id === formData.value.barber_id)
+)
+
+// Cargar slots cuando cambia la fecha, servicio o barbero
+watch([() => formData.value.date, () => formData.value.service_id, () => formData.value.barber_id], 
+  async ([newDate, newService, newBarber]) => {
+    if (newDate && newService && newBarber) {
+      await loadAvailableSlots()
+    } else {
+      availableSlots.value = []
+    }
+  }
+)
+
+const loadAvailableSlots = async () => {
+  if (!formData.value.date || !formData.value.service_id || !formData.value.barber_id) return
+  
+  try {
+    loadingSlots.value = true
+    const slots = await fetchAvailableSlots(
+      formData.value.date, 
+      formData.value.service_id,
+      formData.value.barber_id
     )
-  } else {
+    
+    // Asegurar que slots es un array
+    if (Array.isArray(slots)) {
+      availableSlots.value = slots.map(slot => ({
+        value: slot.time,
+        label: slot.time,
+        disabled: !slot.available
+      }))
+    } else {
+      console.warn('Slots no es un array:', slots)
+      availableSlots.value = []
+    }
+  } catch (error) {
+    console.error('Error cargando horarios:', error)
     availableSlots.value = []
+  } finally {
+    loadingSlots.value = false
   }
 }
 
 // Navegación entre pasos
 const goToStep = (step) => {
   if (step === 2 && currentStep.value === 1) {
-    validateField('service')
-    if (!errors.value.service) {
+    if (!preSelectedService.value) {
+      validateField('service_id')
+      if (errors.value.service_id) return
+    }
+    validateField('barber_id')
+    if (!errors.value.barber_id) {
       currentStep.value = step
     }
   } else if (step === 3 && currentStep.value === 2) {
@@ -76,7 +129,7 @@ const goToStep = (step) => {
 }
 
 const selectTimeSlot = (slot) => {
-  formData.value.time = slot.time
+  formData.value.time = slot.value
   errors.value.time = ''
 }
 
@@ -89,23 +142,51 @@ const handleSubmit = async () => {
   isSubmitting.value = true
 
   try {
-    const booking = await createBooking({
-      service: formData.value.service,
+    const response = await createBooking({
+      service_id: parseInt(formData.value.service_id),
+      barber_id: parseInt(formData.value.barber_id),
       date: formData.value.date,
       time: formData.value.time,
-      name: formData.value.name,
-      phone: formData.value.phone,
-      observations: formData.value.observations
+      client_name: formData.value.client_name,
+      client_phone: formData.value.client_phone,
+      client_email: formData.value.client_email || null,
+      notes: formData.value.notes
     })
+
+    const appointment = response.appointment
+    if (!appointment?.public_code) {
+      throw new Error('No se encontró el código de la reserva')
+    }
 
     resetForm()
     router.push({ 
       name: 'BookSuccess', 
-      query: { id: booking.id }
+      query: { code: appointment.public_code }
     })
   } catch (error) {
-    alert('Error al crear la reserva. Por favor intentá nuevamente.')
-    console.error('Error:', error)
+    console.error('Error completo:', JSON.stringify(error, null, 2))
+    console.error('Datos enviados:', {
+      service_id: parseInt(formData.value.service_id),
+      barber_id: parseInt(formData.value.barber_id),
+      date: formData.value.date,
+      time: formData.value.time,
+      client_name: formData.value.client_name,
+      client_phone: formData.value.client_phone,
+    })
+    console.error('Errores de validación:', error?.errors)
+    console.error('Data completo:', JSON.stringify(error?.data, null, 2))
+    console.error('Message:', error?.message)
+    
+    // Extraer mensajes de error detallados
+    let errorMessage = 'Error al crear la reserva.'
+    if (error?.errors) {
+      const errorList = Object.values(error.errors).flat()
+      errorMessage = errorList.join('\n')
+    } else if (error?.message) {
+      errorMessage = error.message
+    }
+    
+    alert(errorMessage)
   } finally {
     isSubmitting.value = false
   }
@@ -150,34 +231,59 @@ const handleSubmit = async () => {
 
       <Card class="p-8">
         <form @submit.prevent="handleSubmit">
-          <!-- Step 1: Servicio -->
+          <!-- Step 1: Servicio y Barbero -->
           <div v-show="currentStep === 1">
             <h2 class="text-2xl font-display font-bold text-white mb-6">
-              1. Seleccioná el servicio
+              1. {{ preSelectedService ? 'Elegí tu barbero' : 'Seleccioná servicio y barbero' }}
             </h2>
 
-            <BaseSelect
-              v-model="formData.service"
-              label="Servicio"
-              :options="serviceOptions"
-              :error="errors.service"
-              required
-              @change="validateField('service')"
-            />
+            <!-- Servicio pre-seleccionado -->
+            <div v-if="preSelectedService" class="mb-6 p-4 bg-primary-600/10 border border-primary-600/30 rounded-lg">
+              <h3 class="text-white font-semibold mb-2">Servicio seleccionado:</h3>
+              <p class="text-lg font-bold text-primary-500">{{ preSelectedService.title }}</p>
+              <div class="flex gap-4 mt-2 text-sm text-gray-300">
+                <span>⏱️ {{ preSelectedService.duration_minutes }} minutos</span>
+                <span>💰 ${{ preSelectedService.price }}</span>
+              </div>
+            </div>
 
-            <div v-if="selectedService" class="mt-6 p-4 bg-dark-800 rounded-lg border border-dark-700">
-              <p class="text-gray-300 text-sm mb-2">
-                <strong>Duración:</strong> {{ selectedService.duration }} minutos
-              </p>
-              <p class="text-gray-300 text-sm">
-                <strong>Precio:</strong> ${{ selectedService.price }}
-              </p>
+            <!-- Selector de servicio (solo si no hay pre-selección) -->
+            <div v-if="!preSelectedService" class="mb-6">
+              <BaseSelect
+                v-model="formData.service_id"
+                label="Servicio"
+                :options="serviceOptions"
+                :error="errors.service_id"
+                required
+                @change="validateField('service_id')"
+              />
+
+              <div v-if="selectedService" class="mt-4 p-4 bg-dark-800 rounded-lg border border-dark-700">
+                <p class="text-gray-300 text-sm mb-2">
+                  <strong>Duración:</strong> {{ selectedService.duration_minutes }} minutos
+                </p>
+                <p class="text-gray-300 text-sm">
+                  <strong>Precio:</strong> ${{ selectedService.price }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Selector de barbero -->
+            <div class="mb-6">
+              <BaseSelect
+                v-model="formData.barber_id"
+                label="Barbero"
+                :options="barberOptions"
+                :error="errors.barber_id"
+                required
+                @change="validateField('barber_id')"
+              />
             </div>
 
             <div class="mt-8 flex justify-end">
               <BaseButton
                 @click="goToStep(2)"
-                :disabled="!formData.service"
+                :disabled="!formData.service_id || !formData.barber_id"
               >
                 Siguiente
               </BaseButton>
@@ -216,20 +322,23 @@ const handleSubmit = async () => {
                   Horarios disponibles <span class="text-primary-500">*</span>
                 </label>
                 
-                <div v-if="availableSlots.length > 0" class="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
+                <div v-if="formData.date && availableSlots.length > 0" class="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
                   <button
                     v-for="slot in availableSlots"
-                    :key="slot.time"
+                    :key="slot.value"
                     type="button"
                     @click="selectTimeSlot(slot)"
+                    :disabled="slot.disabled"
                     :class="[
                       'px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg text-sm sm:text-base font-semibold transition-all border-2',
-                      formData.time === slot.time
+                      formData.time === slot.value
                         ? 'bg-primary-600 border-primary-600 text-white'
+                        : slot.disabled
+                        ? 'bg-dark-900 border-dark-800 text-gray-600 cursor-not-allowed'
                         : 'bg-dark-800 border-dark-700 text-gray-300 hover:border-primary-600 hover:text-white'
                     ]"
                   >
-                    {{ slot.time }}
+                    {{ slot.label }}
                   </button>
                 </div>
 
@@ -280,7 +389,10 @@ const handleSubmit = async () => {
               <h3 class="text-white font-semibold mb-3">Resumen de tu turno:</h3>
               <div class="space-y-2 text-sm">
                 <p class="text-gray-300">
-                  <strong>Servicio:</strong> {{ selectedService?.name }}
+                  <strong>Servicio:</strong> {{ selectedService?.title }}
+                </p>
+                <p class="text-gray-300">
+                  <strong>Barbero:</strong> {{ selectedBarber?.name }}
                 </p>
                 <p class="text-gray-300">
                   <strong>Fecha:</strong> {{ formatDate(formData.date) }}
@@ -289,33 +401,43 @@ const handleSubmit = async () => {
                   <strong>Hora:</strong> {{ formData.time }}
                 </p>
                 <p class="text-gray-300">
-                  <strong>Duración:</strong> {{ selectedService?.duration }} minutos
+                  <strong>Duración:</strong> {{ selectedService?.duration_minutes }} minutos
+                </p>
+                <p class="text-gray-300">
+                  <strong>Precio:</strong> ${{ selectedService?.price }}
                 </p>
               </div>
             </div>
 
             <div class="space-y-6">
               <BaseInput
-                v-model="formData.name"
+                v-model="formData.client_name"
                 label="Nombre completo"
                 placeholder="Juan Pérez"
-                :error="errors.name"
-                required
-                @blur="validateField('name')"
+                :error="errors.client_name"
+                @blur="validateField('client_name')"
               />
 
               <BaseInput
-                v-model="formData.phone"
+                v-model="formData.client_phone"
                 label="Teléfono"
                 type="tel"
                 placeholder="11 2345 6789"
-                :error="errors.phone"
-                required
-                @blur="validateField('phone')"
+                :error="errors.client_phone"
+                @blur="validateField('client_phone')"
               />
 
               <BaseInput
-                v-model="formData.observations"
+                v-model="formData.client_email"
+                label="Email (opcional)"
+                type="email"
+                placeholder="tu@email.com"
+                :error="errors.client_email"
+                @blur="validateField('client_email')"
+              />
+
+              <BaseInput
+                v-model="formData.notes"
                 label="Observaciones (opcional)"
                 placeholder="Comentarios adicionales..."
               />

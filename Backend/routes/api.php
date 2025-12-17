@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\Api\Admin\AuthController;
+use App\Http\Controllers\Api\Admin\BarberController;
+use App\Http\Controllers\Api\Admin\ClientController;
 use App\Http\Controllers\Api\Admin\GalleryController as AdminGalleryController;
 use App\Http\Controllers\Api\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Api\AppointmentController;
@@ -19,6 +21,10 @@ use Illuminate\Support\Facades\Route;
 // Services
 Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/services/{service}', [ServiceController::class, 'show']);
+
+// Barbers (Public)
+Route::get('/barbers', [\App\Http\Controllers\Api\BarberController::class, 'index']);
+Route::get('/barbers/{barber}', [\App\Http\Controllers\Api\BarberController::class, 'show']);
 
 // Gallery
 Route::get('/gallery', [GalleryController::class, 'index']);
@@ -45,12 +51,30 @@ Route::prefix('admin')->group(function () {
 
         // Dashboard stats
         Route::get('/dashboard/stats', [AdminAppointmentController::class, 'stats']);
+        Route::get('/dashboard/monthly-stats', [AdminAppointmentController::class, 'monthlyStats']);
 
         // Appointments
         Route::get('/appointments', [AdminAppointmentController::class, 'index']);
+        Route::get('/appointments/{appointment}', [AdminAppointmentController::class, 'show']);
         Route::put('/appointments/{appointment}/status', [AdminAppointmentController::class, 'updateStatus']);
 
+        // Barbers
+        Route::get('/barbers', [BarberController::class, 'index']);
+        Route::get('/barbers/{barber}', [BarberController::class, 'show']);
+        Route::post('/barbers', [BarberController::class, 'store']);
+        Route::put('/barbers/{barber}', [BarberController::class, 'update']);
+        Route::delete('/barbers/{barber}', [BarberController::class, 'destroy']);
+        Route::post('/barbers/{barber}/schedules', [BarberController::class, 'updateSchedules']);
+        Route::get('/barbers/{barber}/appointments', [BarberController::class, 'appointments']);
+        Route::get('/barbers/{barber}/earnings', [BarberController::class, 'earnings']);
+
+        // Clients
+        Route::get('/clients', [ClientController::class, 'index']);
+        Route::get('/clients/{client}', [ClientController::class, 'show']);
+        Route::get('/clients/search/appointments', [ClientController::class, 'searchByAppointments']);
+
         // Services
+        Route::get('/services', [AdminServiceController::class, 'index']);
         Route::post('/services', [AdminServiceController::class, 'store']);
         Route::put('/services/{service}', [AdminServiceController::class, 'update']);
         Route::delete('/services/{service}', [AdminServiceController::class, 'destroy']);
