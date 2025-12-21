@@ -105,10 +105,10 @@ onMounted(() => {
   <div>
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-display font-bold text-white mb-2">
+      <h1 class="text-3xl font-display font-bold text-dark-800 mb-2">
         Gestión de Turnos
       </h1>
-      <p class="text-gray-400">
+      <p class="text-dark-600">
         Administrá todas las reservas
       </p>
     </div>
@@ -139,12 +139,12 @@ onMounted(() => {
       </div>
 
       <div class="mt-4 flex justify-between items-center">
-        <p class="text-sm text-gray-400">
+        <p class="text-sm text-dark-600">
           Mostrando {{ filteredBookings.length }} de {{ bookings.length }} turnos
         </p>
         <button
           @click="clearFilters"
-          class="text-sm text-primary-500 hover:text-primary-400 font-semibold"
+          class="text-sm text-gold-600 hover:text-gold-700 font-semibold"
         >
           Limpiar filtros
         </button>
@@ -153,8 +153,8 @@ onMounted(() => {
 
     <!-- Loading -->
     <div v-if="loading" class="text-center py-12">
-      <ClockIcon class="w-12 h-12 mx-auto mb-4 text-gray-400 animate-pulse" />
-      <p class="text-gray-400">Cargando turnos...</p>
+      <ClockIcon class="w-12 h-12 mx-auto mb-4 text-gold-500 animate-pulse" />
+      <p class="text-dark-600">Cargando turnos...</p>
     </div>
 
     <!-- Bookings Table -->
@@ -162,42 +162,42 @@ onMounted(() => {
       <!-- Desktop Table -->
       <div class="hidden md:block overflow-x-auto">
         <table class="w-full">
-          <thead class="border-b border-dark-800">
+          <thead class="border-b border-gold-200">
             <tr>
-              <th class="text-left p-4 text-gray-400 text-sm font-semibold">ID</th>
-              <th class="text-left p-4 text-gray-400 text-sm font-semibold">Cliente</th>
-              <th class="text-left p-4 text-gray-400 text-sm font-semibold">Fecha</th>
-              <th class="text-left p-4 text-gray-400 text-sm font-semibold">Hora</th>
-              <th class="text-left p-4 text-gray-400 text-sm font-semibold">Servicio</th>
-              <th class="text-left p-4 text-gray-400 text-sm font-semibold">Barbero</th>
-              <th class="text-left p-4 text-gray-400 text-sm font-semibold">Estado</th>
-              <th class="text-left p-4 text-gray-400 text-sm font-semibold">Acciones</th>
+              <th class="text-left p-4 text-dark-700 text-sm font-semibold">ID</th>
+              <th class="text-left p-4 text-dark-700 text-sm font-semibold">Cliente</th>
+              <th class="text-left p-4 text-dark-700 text-sm font-semibold">Fecha</th>
+              <th class="text-left p-4 text-dark-700 text-sm font-semibold">Hora</th>
+              <th class="text-left p-4 text-dark-700 text-sm font-semibold">Servicio</th>
+              <th class="text-left p-4 text-dark-700 text-sm font-semibold">Barbero</th>
+              <th class="text-left p-4 text-dark-700 text-sm font-semibold">Estado</th>
+              <th class="text-left p-4 text-dark-700 text-sm font-semibold">Acciones</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-dark-800">
+          <tbody class="divide-y divide-gray-200">
             <tr
               v-for="booking in filteredBookings"
               :key="booking.id"
-              class="hover:bg-dark-800 transition-colors"
+              class="hover:bg-gold-50 transition-colors"
             >
-              <td class="p-4 text-gray-300 text-sm font-mono">#{{ booking.id }}</td>
+              <td class="p-4 text-dark-700 text-sm font-mono">#{{ booking.id }}</td>
               <td class="p-4">
-                <div class="text-white font-semibold">{{ booking.name }}</div>
-                <div class="text-gray-400 text-sm">{{ booking.phone }}</div>
+                <div class="text-dark-800 font-semibold">{{ booking.name }}</div>
+                <div class="text-dark-600 text-sm">{{ booking.phone }}</div>
               </td>
-              <td class="p-4 text-gray-300 text-sm">
+              <td class="p-4 text-dark-700 text-sm">
                 {{ formatDate(booking.date) }}
               </td>
-              <td class="p-4 text-white font-semibold">{{ booking.time }}</td>
-              <td class="p-4 text-gray-300 text-sm">{{ booking.serviceName }}</td>
-              <td class="p-4 text-gray-300 text-sm">{{ booking.barberName }}</td>
+              <td class="p-4 text-dark-800 font-semibold">{{ booking.time }}</td>
+              <td class="p-4 text-dark-700 text-sm">{{ booking.serviceName }}</td>
+              <td class="p-4 text-dark-700 text-sm">{{ booking.barberName }}</td>
               <td class="p-4">
                 <BadgeStatus :status="booking.status" />
               </td>
               <td class="p-4">
                 <RouterLink
                   :to="`/admin/bookings/${booking.id}`"
-                  class="text-primary-500 hover:text-primary-400 text-sm font-semibold"
+                  class="text-gold-600 hover:text-gold-700 text-sm font-semibold"
                 >
                   Ver detalle →
                 </RouterLink>
@@ -208,35 +208,35 @@ onMounted(() => {
       </div>
 
       <!-- Mobile Cards -->
-      <div class="md:hidden divide-y divide-dark-800">
+      <div class="md:hidden divide-y divide-gray-200">
         <RouterLink
           v-for="booking in filteredBookings"
           :key="booking.id"
           :to="`/admin/bookings/${booking.id}`"
-          class="block p-4 hover:bg-dark-800 transition-colors"
+          class="block p-4 hover:bg-gold-50 transition-colors"
         >
           <div class="flex items-start justify-between mb-3">
             <div>
-              <h3 class="text-white font-semibold mb-1">{{ booking.name }}</h3>
-              <p class="text-gray-400 text-sm">{{ booking.phone }}</p>
+              <h3 class="text-dark-800 font-semibold mb-1">{{ booking.name }}</h3>
+              <p class="text-dark-600 text-sm">{{ booking.phone }}</p>
             </div>
             <BadgeStatus :status="booking.status" />
           </div>
           
           <div class="grid grid-cols-2 gap-2 text-sm mb-2">
             <div>
-              <span class="text-gray-400">Fecha:</span>
-              <p class="text-white">{{ booking.date }}</p>
+              <span class="text-dark-600">Fecha:</span>
+              <p class="text-dark-800">{{ booking.date }}</p>
             </div>
             <div>
-              <span class="text-gray-400">Hora:</span>
-              <p class="text-white font-semibold">{{ booking.time }}</p>
+              <span class="text-dark-600">Hora:</span>
+              <p class="text-dark-800 font-semibold">{{ booking.time }}</p>
             </div>
           </div>
           
           <div class="space-y-1">
-            <p class="text-gray-300 text-sm">{{ booking.serviceName }}</p>
-            <p class="text-gray-400 text-sm">👤 {{ booking.barberName }}</p>
+            <p class="text-dark-700 text-sm">{{ booking.serviceName }}</p>
+            <p class="text-dark-600 text-sm">👤 {{ booking.barberName }}</p>
           </div>
         </RouterLink>
       </div>
@@ -245,10 +245,10 @@ onMounted(() => {
     <!-- Empty State -->
     <Card v-else class="p-12 text-center">
       <div class="text-6xl mb-4">📭</div>
-      <h3 class="text-xl font-display font-bold text-white mb-2">
+      <h3 class="text-xl font-display font-bold text-dark-800 mb-2">
         No hay turnos
       </h3>
-      <p class="text-gray-400">
+      <p class="text-dark-600">
         {{ filters.search || filters.date || filters.status || filters.service
           ? 'No se encontraron turnos con los filtros aplicados'
           : 'Todavía no hay turnos registrados'

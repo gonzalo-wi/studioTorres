@@ -44,11 +44,11 @@ const isActive = (link) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-black flex">
+  <div class="min-h-screen bg-gray-50 flex">
     <!-- Sidebar Desktop -->
-    <aside class="hidden lg:flex lg:flex-col lg:w-64 bg-gradient-to-b from-gray-900 to-black border-r border-gray-800 fixed left-0 top-0 bottom-0">
+    <aside class="hidden lg:flex lg:flex-col lg:w-64 bg-white border-r border-gold-200 shadow-xl fixed left-0 top-0 bottom-0">
       <!-- Logo -->
-      <div class="p-6 border-b border-gray-800 flex-shrink-0">
+      <div class="p-6 border-b border-gold-200 flex-shrink-0 bg-gradient-to-br from-gold-50 to-white">
         <RouterLink to="/admin" class="flex items-center space-x-3">
           <img 
             src="@/assets/LogoBarber.png" 
@@ -56,8 +56,8 @@ const isActive = (link) => {
             class="h-10 w-auto"
           />
           <div>
-            <div class="text-white font-bold text-lg">Studio Torres</div>
-            <div class="text-gray-400 text-xs">Panel Admin</div>
+            <div class="text-dark-900 font-bold text-lg">Studio Torres</div>
+            <div class="text-gold-700 text-xs font-semibold">Panel Admin</div>
           </div>
         </RouterLink>
       </div>
@@ -71,8 +71,8 @@ const isActive = (link) => {
           :class="[
             'flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200',
             isActive(link)
-              ? 'bg-red-600 text-white shadow-lg shadow-red-600/50'
-              : 'text-gray-400 hover:text-white hover:bg-gray-800'
+              ? 'bg-gradient-to-r from-gold-500 to-gold-600 text-white shadow-lg shadow-gold-500/30'
+              : 'text-dark-600 hover:text-gold-700 hover:bg-gold-50'
           ]"
         >
           <component :is="link.icon" class="w-5 h-5 flex-shrink-0" />
@@ -81,10 +81,10 @@ const isActive = (link) => {
       </nav>
 
       <!-- User Section -->
-      <div class="p-4 border-t border-gray-800 flex-shrink-0">
+      <div class="p-4 border-t border-gold-200 flex-shrink-0">
         <button
           @click="handleLogout"
-          class="flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all duration-200"
+          class="flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-dark-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200">
         >
           <ArrowRightOnRectangleIcon class="w-5 h-5" />
           <span class="font-semibold">Cerrar Sesión</span>
@@ -102,12 +102,12 @@ const isActive = (link) => {
     <!-- Mobile Sidebar -->
     <aside
       :class="[
-        'fixed top-0 left-0 bottom-0 w-64 bg-gradient-to-b from-gray-900 to-black border-r border-gray-800 z-50 transform transition-transform duration-300 lg:hidden',
+        'fixed top-0 left-0 bottom-0 w-64 bg-white border-r border-gold-200 shadow-2xl z-50 transform transition-transform duration-300 lg:hidden',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       ]"
     >
       <!-- Mobile Header -->
-      <div class="p-4 border-b border-gray-800 flex items-center justify-between">
+      <div class="p-4 border-b border-gold-200 flex items-center justify-between bg-gradient-to-br from-gold-50 to-white">
         <RouterLink to="/admin" @click="closeSidebar" class="flex items-center space-x-3">
           <img 
             src="@/assets/LogoBarber.png" 
@@ -115,11 +115,11 @@ const isActive = (link) => {
             class="h-8 w-auto"
           />
           <div>
-            <div class="text-white font-bold">Studio Torres</div>
-            <div class="text-gray-400 text-xs">Panel Admin</div>
+            <div class="text-dark-900 font-bold">Studio Torres</div>
+            <div class="text-gold-700 text-xs font-semibold">Panel Admin</div>
           </div>
         </RouterLink>
-        <button @click="closeSidebar" class="text-gray-400 hover:text-white">
+        <button @click="closeSidebar" class="text-dark-600 hover:text-gold-700">
           <XMarkIcon class="w-6 h-6" />
         </button>
       </div>
@@ -134,8 +134,8 @@ const isActive = (link) => {
           :class="[
             'flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200',
             isActive(link)
-              ? 'bg-red-600 text-white shadow-lg shadow-red-600/50'
-              : 'text-gray-400 hover:text-white hover:bg-gray-800'
+              ? 'bg-gradient-to-r from-gold-500 to-gold-600 text-white shadow-lg shadow-gold-500/30'
+              : 'text-dark-600 hover:text-gold-700 hover:bg-gold-50'
           ]"
         >
           <component :is="link.icon" class="w-5 h-5 flex-shrink-0" />
@@ -144,10 +144,10 @@ const isActive = (link) => {
       </nav>
 
       <!-- Mobile User Section -->
-      <div class="p-4 border-t border-gray-800">
+      <div class="p-4 border-t border-gold-200">
         <button
           @click="handleLogout"
-          class="flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all duration-200"
+          class="flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-dark-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200">
         >
           <ArrowRightOnRectangleIcon class="w-5 h-5" />
           <span class="font-semibold">Cerrar Sesión</span>
@@ -158,11 +158,11 @@ const isActive = (link) => {
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col min-h-screen lg:ml-64">
       <!-- Mobile Header -->
-      <header class="lg:hidden bg-gray-900 border-b border-gray-800 sticky top-0 z-30">
+      <header class="lg:hidden bg-white border-b border-gold-200 shadow-sm sticky top-0 z-30">
         <div class="flex items-center justify-between p-4">
           <button
             @click="sidebarOpen = true"
-            class="text-gray-400 hover:text-white"
+            class="text-dark-600 hover:text-gold-700">
           >
             <Bars3Icon class="w-6 h-6" />
           </button>

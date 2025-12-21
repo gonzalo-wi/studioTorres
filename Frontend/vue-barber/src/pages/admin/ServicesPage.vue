@@ -1,13 +1,13 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-indigo-950 via-gray-900 to-black py-8 px-4">
+  <div class="min-h-screen bg-gray-50 py-8 px-4">
     <div class="mx-auto">
       <!-- Header -->
       <div class="flex justify-between items-center mb-8">
         <div>
-          <h1 class="text-3xl font-display font-bold text-white mb-2">
+          <h1 class="text-3xl font-display font-bold text-dark-800 mb-2">
             Gestión de Servicios
           </h1>
-          <p class="text-gray-400">
+          <p class="text-dark-600">
             Administrá los servicios disponibles en la barbería
           </p>
         </div>
@@ -22,24 +22,24 @@
         <div
           v-for="service in services"
           :key="service.id"
-          class="bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 rounded-xl overflow-hidden hover:border-indigo-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-600/10 group"
+          class="bg-white border border-gold-200 rounded-xl overflow-hidden hover:border-gold-500 transition-all duration-300 hover:shadow-xl group"
         >
           <!-- Service Header -->
-          <div class="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border-b border-gray-800 p-6">
+          <div class="bg-gradient-to-r from-gold-500/10 to-gold-600/10 border-b border-gold-200 p-6">
             <div class="flex items-start justify-between mb-3">
-              <h3 class="text-xl font-bold text-white">{{ service.title }}</h3>
+              <h3 class="text-xl font-bold text-dark-800">{{ service.title }}</h3>
               <span
                 :class="[
                   'px-3 py-1 rounded-full text-xs font-semibold',
                   service.active 
-                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                    : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                    ? 'bg-green-100 text-green-700 border border-green-300'
+                    : 'bg-gray-100 text-gray-600 border border-gray-300'
                 ]"
               >
                 {{ service.active ? 'Activo' : 'Inactivo' }}
               </span>
             </div>
-            <p class="text-gray-400 text-sm line-clamp-2">
+            <p class="text-dark-600 text-sm line-clamp-2">
               {{ service.description || 'Sin descripción' }}
             </p>
           </div>
@@ -47,35 +47,35 @@
           <!-- Service Details -->
           <div class="p-6 space-y-4">
             <!-- Duration -->
-            <div class="flex items-center justify-between bg-gray-950/50 rounded-lg p-3 border border-gray-800">
-              <div class="flex items-center gap-2 text-gray-400">
+            <div class="flex items-center justify-between bg-gray-50 rounded-lg p-3 border border-gold-200">
+              <div class="flex items-center gap-2 text-dark-600">
                 <ClockIcon class="w-5 h-5" />
                 <span class="text-sm font-medium">Duración</span>
               </div>
-              <span class="text-white font-bold">{{ service.duration_minutes }} min</span>
+              <span class="text-dark-800 font-bold">{{ service.duration_minutes }} min</span>
             </div>
 
             <!-- Price -->
-            <div class="flex items-center justify-between bg-gradient-to-r from-indigo-950/30 to-purple-950/30 rounded-lg p-3 border border-indigo-900/30">
-              <div class="flex items-center gap-2 text-indigo-400">
+            <div class="flex items-center justify-between bg-gradient-to-r from-gold-50 to-gold-100/50 rounded-lg p-3 border border-gold-300">
+              <div class="flex items-center gap-2 text-gold-700">
                 <CurrencyDollarIcon class="w-5 h-5" />
                 <span class="text-sm font-medium">Precio</span>
               </div>
-              <span class="text-white font-bold text-lg">${{ service.price }}</span>
+              <span class="text-dark-800 font-bold text-lg">${{ service.price }}</span>
             </div>
 
             <!-- Actions -->
             <div class="flex gap-2 pt-2">
               <button
                 @click="openEditModal(service)"
-                class="flex-1 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 hover:text-indigo-300 font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-indigo-600/30"
+                class="flex-1 bg-gold-500 hover:bg-gold-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
               >
                 <PencilIcon class="w-4 h-4" />
                 Editar
               </button>
               <button
                 @click="confirmDelete(service)"
-                class="bg-red-900/30 hover:bg-red-900/50 text-red-400 hover:text-red-300 p-2.5 rounded-lg transition-colors border border-red-900/30"
+                class="bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 p-2.5 rounded-lg transition-colors"
                 title="Eliminar"
               >
                 <TrashIcon class="w-5 h-5" />
@@ -85,11 +85,11 @@
         </div>
       </div>
 
-      <div v-if="!loading && services.length === 0" class="bg-gray-900/50 backdrop-blur border border-gray-800 rounded-xl p-12 text-center">
-        <div class="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-600/30">
+      <div v-if="!loading && services.length === 0" class="bg-white border border-gold-200 rounded-xl p-12 text-center shadow-lg">
+        <div class="w-16 h-16 bg-gradient-to-br from-gold-500 to-gold-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
           <PlusIcon class="w-8 h-8 text-white" />
         </div>
-        <p class="text-gray-400 text-lg mb-6">No hay servicios creados todavía</p>
+        <p class="text-dark-600 text-lg mb-6">No hay servicios creados todavía</p>
         <BaseButton @click="openCreateModal">
           Crear primer servicio
         </BaseButton>
@@ -97,7 +97,7 @@
 
       <!-- Loading -->
       <div v-if="loading" class="text-center py-12">
-        <p class="text-gray-400">Cargando servicios...</p>
+        <p class="text-dark-600">Cargando servicios...</p>
       </div>
 
       <!-- Service Modal -->
@@ -148,9 +148,9 @@
               id="active"
               v-model="formData.active"
               type="checkbox"
-              class="w-5 h-5 rounded bg-dark-800 border-dark-700 text-red-600 focus:ring-red-500"
+              class="w-5 h-5 rounded bg-white border-gold-300 text-gold-600 focus:ring-gold-500"
             />
-            <label for="active" class="text-white">
+            <label for="active" class="text-dark-800">
               Servicio activo (visible para clientes)
             </label>
           </div>

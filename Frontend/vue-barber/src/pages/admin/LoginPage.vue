@@ -44,14 +44,14 @@ const handleLogin = async () => {
 <template>
   <div class="min-h-screen flex">
     <!-- Left Side - Branding -->
-    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
+    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-white via-gold-50 to-gold-100 relative overflow-hidden">
       <!-- Background Pattern -->
-      <div class="absolute inset-0 opacity-10">
-        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 40px 40px;"></div>
+      <div class="absolute inset-0 opacity-5">
+        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, #d4af37 1px, transparent 0); background-size: 40px 40px;"></div>
       </div>
       
       <!-- Gradient Overlay -->
-      <div class="absolute inset-0 bg-gradient-to-br from-red-600/20 to-transparent"></div>
+      <div class="absolute inset-0 bg-gradient-to-br from-gold-500/10 to-transparent"></div>
       
       <!-- Content -->
       <div class="relative z-10 flex flex-col items-center justify-center w-full p-12 text-center">
@@ -65,48 +65,48 @@ const handleLogin = async () => {
         </div>
         
         <!-- Branding Text -->
-        <h1 class="text-6xl font-bold text-white mb-4 tracking-tight">
+        <h1 class="text-6xl font-bold text-dark-800 mb-4 tracking-tight">
           Studio Torres
         </h1>
-        <p class="text-xl text-gray-300 mb-8 max-w-md">
+        <p class="text-xl text-dark-600 mb-8 max-w-md">
           Sistema de gestión profesional para tu barbería
         </p>
         
         <!-- Features -->
         <div class="space-y-4 text-left max-w-md">
-          <div class="flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
-            <div class="flex-shrink-0 w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center">
+          <div class="flex items-center gap-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gold-200 shadow-md">
+            <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-gold-500 to-gold-600 rounded-lg flex items-center justify-center shadow-lg">
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
             <div>
-              <h3 class="text-white font-semibold">Gestión de Turnos</h3>
-              <p class="text-gray-400 text-sm">Administrá reservas fácilmente</p>
+              <h3 class="text-dark-800 font-semibold">Gestión de Turnos</h3>
+              <p class="text-dark-600 text-sm">Administrá reservas fácilmente</p>
             </div>
           </div>
           
-          <div class="flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
-            <div class="flex-shrink-0 w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center">
+          <div class="flex items-center gap-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gold-200 shadow-md">
+            <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-gold-500 to-gold-600 rounded-lg flex items-center justify-center shadow-lg">
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
             <div>
-              <h3 class="text-white font-semibold">Control de Barberos</h3>
-              <p class="text-gray-400 text-sm">Horarios y disponibilidad</p>
+              <h3 class="text-dark-800 font-semibold">Control de Barberos</h3>
+              <p class="text-dark-600 text-sm">Horarios y disponibilidad</p>
             </div>
           </div>
           
-          <div class="flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
-            <div class="flex-shrink-0 w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center">
+          <div class="flex items-center gap-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gold-200 shadow-md">
+            <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-gold-500 to-gold-600 rounded-lg flex items-center justify-center shadow-lg">
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
             <div>
-              <h3 class="text-white font-semibold">Reportes y Estadísticas</h3>
-              <p class="text-gray-400 text-sm">Analiza el rendimiento</p>
+              <h3 class="text-dark-800 font-semibold">Reportes y Estadísticas</h3>
+              <p class="text-dark-600 text-sm">Analiza el rendimiento</p>
             </div>
           </div>
         </div>
@@ -114,7 +114,7 @@ const handleLogin = async () => {
     </div>
 
     <!-- Right Side - Login Form -->
-    <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-black">
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50">
       <div class="w-full max-w-md">
         <!-- Mobile Logo -->
         <div class="lg:hidden text-center mb-8">
@@ -127,20 +127,20 @@ const handleLogin = async () => {
 
         <!-- Login Header -->
         <div class="mb-8">
-          <h2 class="text-3xl font-bold text-white mb-2">
+          <h2 class="text-3xl font-bold text-dark-800 mb-2">
             Bienvenido
           </h2>
-          <p class="text-gray-400">
+          <p class="text-dark-600">
             Ingresá tus credenciales para acceder al panel
           </p>
         </div>
 
         <!-- Login Form -->
-        <Card class="p-8 bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700">
+        <Card class="p-8 bg-white border-gold-200 shadow-xl">
           <form @submit.prevent="handleLogin" class="space-y-6">
             <!-- Email Input -->
             <div>
-              <label class="block text-sm font-semibold text-gray-300 mb-2">
+              <label class="block text-sm font-semibold text-dark-700 mb-2">
                 Email
               </label>
               <div class="relative">
@@ -152,16 +152,16 @@ const handleLogin = async () => {
                 <input
                   v-model="email"
                   type="email"
-                  placeholder="admin@hernanbarber.com"
+                  placeholder="admin@studiotorres.com"
                   required
-                  class="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition placeholder-gray-500"
+                  class="w-full pl-10 pr-4 py-3 bg-white border border-gold-300 text-dark-800 rounded-lg focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition placeholder-gray-400"
                 />
               </div>
             </div>
 
             <!-- Password Input -->
             <div>
-              <label class="block text-sm font-semibold text-gray-300 mb-2">
+              <label class="block text-sm font-semibold text-dark-700 mb-2">
                 Contraseña
               </label>
               <div class="relative">
@@ -176,7 +176,7 @@ const handleLogin = async () => {
                   placeholder="Ingresá tu contraseña"
                   required
                   @keyup.enter="handleLogin"
-                  class="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition placeholder-gray-500"
+                  class="w-full pl-10 pr-4 py-3 bg-white border border-gold-300 text-dark-800 rounded-lg focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition placeholder-gray-400"
                 />
               </div>
               <p v-if="error" class="mt-2 text-sm text-red-500 flex items-center gap-1">
@@ -191,7 +191,7 @@ const handleLogin = async () => {
             <button
               type="submit"
               :disabled="isLoading"
-              class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+              class="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
             >
               <svg v-if="isLoading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -202,15 +202,15 @@ const handleLogin = async () => {
           </form>
 
           <!-- Dev Hint -->
-          <div class="mt-6 pt-6 border-t border-gray-700">
-            <p class="text-xs text-gray-500 text-center">
-              💡 <strong>Demo:</strong> admin@studiotorres.com | Admin123!
+          <div class="mt-6 pt-6 border-t border-gold-200">
+            <p class="text-xs text-dark-600 text-center">
+              💡 <strong class="text-gold-600">Demo:</strong> admin@studiotorres.com | Admin123!
             </p>
           </div>
         </Card>
 
         <!-- Footer -->
-        <p class="text-center text-gray-500 text-sm mt-8">
+        <p class="text-center text-dark-600 text-sm mt-8">
           © 2025 Studio Torres. Todos los derechos reservados.
         </p>
       </div>

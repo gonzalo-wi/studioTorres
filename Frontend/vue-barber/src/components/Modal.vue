@@ -79,16 +79,16 @@ const sizeClasses = {
         >
           <div
             v-if="show"
-            :class="['bg-dark-900 rounded-lg shadow-2xl w-full overflow-hidden', sizeClasses[size]]"
+            :class="['bg-white rounded-lg shadow-2xl w-full overflow-hidden border border-gold-200', sizeClasses[size]]"
           >
             <!-- Header -->
-            <div v-if="title || $slots.header" class="flex items-center justify-between p-6 border-b border-dark-800">
+            <div v-if="title || $slots.header" class="flex items-center justify-between p-6 border-b border-gold-200 bg-gradient-to-r from-gold-500 to-gold-600">
               <slot name="header">
                 <h3 class="text-xl font-display font-bold text-white">{{ title }}</h3>
               </slot>
               <button
                 @click="closeModal"
-                class="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-dark-800"
+                class="text-white/80 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
                 aria-label="Cerrar"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +103,7 @@ const sizeClasses = {
             </div>
 
             <!-- Footer -->
-            <div v-if="$slots.footer" class="p-6 border-t border-dark-800 bg-dark-950/50">
+            <div v-if="$slots.footer" class="p-6 border-t border-gold-200 bg-gray-50">
               <slot name="footer" />
             </div>
           </div>
