@@ -46,10 +46,10 @@ const updateValue = (event) => {
     <label
       v-if="label"
       :for="inputId"
-      class="block text-sm font-semibold text-gray-300 mb-2"
+      class="block text-sm font-semibold text-dark-700 mb-2"
     >
       {{ label }}
-      <span v-if="required" class="text-primary-500">*</span>
+      <span v-if="required" class="text-gold-600">*</span>
     </label>
     
     <input
@@ -61,10 +61,10 @@ const updateValue = (event) => {
       :required="required"
       @input="updateValue"
       :class="[
-        'w-full px-4 py-3 bg-dark-800 border rounded-lg text-white placeholder-gray-500 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-950 disabled:opacity-50 disabled:cursor-not-allowed',
+        'w-full px-4 py-3 bg-white border rounded-lg text-dark-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50',
         error 
           ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-          : 'border-dark-700 focus:border-primary-500 focus:ring-primary-500'
+          : 'border-gold-300 focus:border-gold-500 focus:ring-gold-500'
       ]"
     />
     

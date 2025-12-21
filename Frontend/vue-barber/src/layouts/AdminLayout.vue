@@ -9,7 +9,8 @@ import {
   UsersIcon,
   XMarkIcon,
   Bars3Icon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  DocumentChartBarIcon
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
@@ -26,7 +27,8 @@ const navLinks = [
   { to: '/admin', label: 'Dashboard', icon: ChartBarIcon, exact: true },
   { to: '/admin/bookings', label: 'Turnos', icon: CalendarDaysIcon },
   { to: '/admin/barbers', label: 'Barberos', icon: UsersIcon },
-  { to: '/admin/services', label: 'Servicios', icon: Squares2X2Icon }
+  { to: '/admin/services', label: 'Servicios', icon: Squares2X2Icon },
+  { to: '/admin/reports', label: 'Reportes', icon: DocumentChartBarIcon }
 ]
 
 const closeSidebar = () => {

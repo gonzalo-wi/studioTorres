@@ -42,6 +42,18 @@ export function useBookingForm() {
       case 'date':
         if (!formData.value.date) {
           errors.value.date = 'Seleccioná una fecha'
+        } else {
+          const selectedDate = new Date(formData.value.date + 'T00:00:00')
+          const today = new Date()
+          today.setHours(0, 0, 0, 0)
+          
+          if (selectedDate < today) {
+            errors.value.date = 'No podés seleccionar una fecha pasada'
+            formData.value.date = ''
+          } else if (selectedDate.getDay() === 0) {
+            errors.value.date = 'No trabajamos los domingos. Por favor elegí otra fecha'
+            formData.value.date = ''
+          }
         }
         break
       
@@ -53,9 +65,18 @@ export function useBookingForm() {
       
       case 'client_name':
         if (!formData.value.client_name.trim()) {
-          errors.value.client_name = 'Ingresá tu nombre'
+          errors.value.client_name = 'Ingresá tu nombre completo'
+        } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(formData.value.client_name)) {
+          errors.value.client_name = 'El nombre solo puede contener letras'
         } else if (!validateName(formData.value.client_name)) {
-          errors.value.client_name = 'El nombre debe tener al menos 2 caracteres'
+          const words = formData.value.client_name.trim().split(/\s+/).filter(w => w.length > 0)
+          if (words.length < 2) {
+            errors.value.client_name = 'Ingresá nombre y apellido (ejemplo: Juan Pérez)'
+          } else if (words.length > 2) {
+            errors.value.client_name = 'Ingresá solo nombre y apellido'
+          } else {
+            errors.value.client_name = 'Cada nombre debe tener al menos 2 letras'
+          }
         }
         break
       
@@ -68,7 +89,9 @@ export function useBookingForm() {
         break
       
       case 'client_email':
-        if (formData.value.client_email && !formData.value.client_email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        if (!formData.value.client_email.trim()) {
+          errors.value.client_email = 'Ingresá tu email'
+        } else if (!formData.value.client_email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
           errors.value.client_email = 'Ingresá un email válido'
         }
         break
@@ -82,9 +105,7 @@ export function useBookingForm() {
     validateField('time')
     validateField('client_name')
     validateField('client_phone')
-    if (formData.value.client_email) {
-      validateField('client_email')
-    }
+    validateField('client_email')
 
     return !Object.values(errors.value).some(error => error !== '')
   }

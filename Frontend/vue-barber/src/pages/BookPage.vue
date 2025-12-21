@@ -198,10 +198,10 @@ const handleSubmit = async () => {
     <div class="container mx-auto px-4 max-w-4xl">
       <!-- Header -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl font-display font-bold text-white mb-4">
+        <h1 class="text-4xl font-display font-bold text-dark-900 mb-4">
           Reservá tu Turno
         </h1>
-        <p class="text-gray-400 text-lg">
+        <p class="text-dark-600 text-lg">
           Completá el formulario y asegurá tu lugar
         </p>
       </div>
@@ -213,8 +213,8 @@ const handleSubmit = async () => {
             :class="[
               'w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all',
               currentStep >= step
-                ? 'bg-primary-600 text-white'
-                : 'bg-dark-800 text-gray-500'
+                ? 'bg-gold-500 text-white shadow-md'
+                : 'bg-gray-200 text-gray-500'
             ]"
           >
             {{ step }}
@@ -223,7 +223,7 @@ const handleSubmit = async () => {
             v-if="step < 3"
             :class="[
               'w-20 h-1 mx-2',
-              currentStep > step ? 'bg-primary-600' : 'bg-dark-800'
+              currentStep > step ? 'bg-gold-500' : 'bg-gray-200'
             ]"
           ></div>
         </div>
@@ -233,15 +233,15 @@ const handleSubmit = async () => {
         <form @submit.prevent="handleSubmit">
           <!-- Step 1: Servicio y Barbero -->
           <div v-show="currentStep === 1">
-            <h2 class="text-2xl font-display font-bold text-white mb-6">
+            <h2 class="text-2xl font-display font-bold text-dark-900 mb-6">
               1. {{ preSelectedService ? 'Elegí tu barbero' : 'Seleccioná servicio y barbero' }}
             </h2>
 
             <!-- Servicio pre-seleccionado -->
-            <div v-if="preSelectedService" class="mb-6 p-4 bg-primary-600/10 border border-primary-600/30 rounded-lg">
-              <h3 class="text-white font-semibold mb-2">Servicio seleccionado:</h3>
-              <p class="text-lg font-bold text-primary-500">{{ preSelectedService.title }}</p>
-              <div class="flex gap-4 mt-2 text-sm text-gray-300">
+            <div v-if="preSelectedService" class="mb-6 p-4 bg-gold-50 border border-gold-300 rounded-lg">
+              <h3 class="text-dark-900 font-semibold mb-2">Servicio seleccionado:</h3>
+              <p class="text-lg font-bold text-gold-700">{{ preSelectedService.title }}</p>
+              <div class="flex gap-4 mt-2 text-sm text-dark-600">
                 <span>⏱️ {{ preSelectedService.duration_minutes }} minutos</span>
                 <span>💰 ${{ preSelectedService.price }}</span>
               </div>
@@ -258,11 +258,11 @@ const handleSubmit = async () => {
                 @change="validateField('service_id')"
               />
 
-              <div v-if="selectedService" class="mt-4 p-4 bg-dark-800 rounded-lg border border-dark-700">
-                <p class="text-gray-300 text-sm mb-2">
-                  <strong>Duración:</strong> {{ selectedService.duration_minutes }} minutos
+              <div v-if="selectedService" class="mt-4 p-4 bg-gold-50 rounded-lg border border-gold-200">
+                <p class="text-dark-700 text-sm mb-2">
+                  ⏱️ <strong>Duración:</strong> {{ selectedService.duration_minutes }} minutos
                 </p>
-                <p class="text-gray-300 text-sm">
+                <p class="text-dark-700 text-sm">
                   <strong>Precio:</strong> ${{ selectedService.price }}
                 </p>
               </div>
@@ -293,32 +293,40 @@ const handleSubmit = async () => {
           <!-- Step 2: Fecha y Hora -->
           <div v-show="currentStep === 2">
             <div class="flex items-center justify-between mb-6">
-              <h2 class="text-2xl font-display font-bold text-white">
-                2. Elegí fecha y hora
+              <h2 class="text-2xl font-display font-bold text-dark-900">
+                2. Elegí fecha y horario
               </h2>
               <button
                 type="button"
                 @click="goToStep(1)"
-                class="text-gray-400 hover:text-white text-sm"
+                class="text-dark-600 hover:text-gold-600 text-sm"
               >
                 ← Volver
               </button>
             </div>
 
             <div class="space-y-6">
-              <BaseInput
-                v-model="formData.date"
-                type="date"
-                label="Fecha"
-                :error="errors.date"
-                :min="getTodayDate()"
-                :max="getMaxDate()"
-                required
-                @change="validateField('date')"
-              />
+              <div>
+                <BaseInput
+                  v-model="formData.date"
+                  type="date"
+                  label="Fecha"
+                  :error="errors.date"
+                  :min="getTodayDate()"
+                  :max="getMaxDate()"
+                  required
+                  @change="validateField('date')"
+                />
+                <p class="mt-2 text-sm text-dark-600 flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Podés reservar desde hoy hasta 7 días adelante. No trabajamos domingos.
+                </p>
+              </div>
 
               <div v-if="formData.date && isValidBookingDate(formData.date)">
-                <label class="block text-sm font-semibold text-gray-300 mb-3">
+                <label class="block text-sm font-semibold text-dark-700 mb-3">
                   Horarios disponibles <span class="text-primary-500">*</span>
                 </label>
                 
@@ -332,17 +340,17 @@ const handleSubmit = async () => {
                     :class="[
                       'px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg text-sm sm:text-base font-semibold transition-all border-2',
                       formData.time === slot.value
-                        ? 'bg-primary-600 border-primary-600 text-white'
+                        ? 'bg-gold-500 border-gold-500 text-white shadow-md'
                         : slot.disabled
-                        ? 'bg-dark-900 border-dark-800 text-gray-600 cursor-not-allowed'
-                        : 'bg-dark-800 border-dark-700 text-gray-300 hover:border-primary-600 hover:text-white'
+                        ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed'
+                        : 'bg-white border-gold-200 text-dark-700 hover:border-gold-400 hover:bg-gold-50'
                     ]"
                   >
                     {{ slot.label }}
                   </button>
                 </div>
 
-                <p v-else class="text-gray-400 text-center py-8">
+                <p v-else class="text-dark-600 text-center py-8">
                   No hay horarios disponibles para esta fecha.
                   Probá con otra fecha.
                 </p>
@@ -372,51 +380,57 @@ const handleSubmit = async () => {
           <!-- Step 3: Datos personales -->
           <div v-show="currentStep === 3">
             <div class="flex items-center justify-between mb-6">
-              <h2 class="text-2xl font-display font-bold text-white">
-                3. Tus datos
+              <h2 class="text-2xl font-display font-bold text-dark-900">
+                3. Completá tus datos
               </h2>
               <button
                 type="button"
                 @click="goToStep(2)"
-                class="text-gray-400 hover:text-white text-sm"
+                class="text-dark-600 hover:text-gold-600 text-sm"
               >
                 ← Volver
               </button>
             </div>
 
             <!-- Resumen -->
-            <div class="mb-8 p-4 bg-dark-800 rounded-lg border border-dark-700">
-              <h3 class="text-white font-semibold mb-3">Resumen de tu turno:</h3>
-              <div class="space-y-2 text-sm">
-                <p class="text-gray-300">
+            <div class="mb-8 p-4 bg-gold-50 rounded-lg border border-gold-200">
+              <h3 class="text-dark-900 font-semibold mb-3">Resumen de tu turno:</h3>
+              <div class="space-y-2">
+                <p class="text-dark-700">
                   <strong>Servicio:</strong> {{ selectedService?.title }}
                 </p>
-                <p class="text-gray-300">
+                <p class="text-dark-700">
                   <strong>Barbero:</strong> {{ selectedBarber?.name }}
                 </p>
-                <p class="text-gray-300">
+                <p class="text-dark-700">
                   <strong>Fecha:</strong> {{ formatDate(formData.date) }}
                 </p>
-                <p class="text-gray-300">
-                  <strong>Hora:</strong> {{ formData.time }}
+                <p class="text-dark-700">
+                  <strong>Horario:</strong> {{ formData.time }}
                 </p>
-                <p class="text-gray-300">
+                <p class="text-dark-700">
                   <strong>Duración:</strong> {{ selectedService?.duration_minutes }} minutos
                 </p>
-                <p class="text-gray-300">
+                <p class="text-dark-700">
                   <strong>Precio:</strong> ${{ selectedService?.price }}
                 </p>
               </div>
             </div>
 
             <div class="space-y-6">
-              <BaseInput
-                v-model="formData.client_name"
-                label="Nombre completo"
-                placeholder="Juan Pérez"
-                :error="errors.client_name"
-                @blur="validateField('client_name')"
-              />
+              <div>
+                <BaseInput
+                  v-model="formData.client_name"
+                  label="Nombre completo"
+                  placeholder="Juan Pérez"
+                  :error="errors.client_name"
+                  required
+                  @blur="validateField('client_name')"
+                />
+                <p class="mt-1 text-xs text-dark-500">
+                  Ingresá tu nombre y apellido (solo letras, sin números ni caracteres especiales)
+                </p>
+              </div>
 
               <BaseInput
                 v-model="formData.client_phone"
@@ -429,10 +443,11 @@ const handleSubmit = async () => {
 
               <BaseInput
                 v-model="formData.client_email"
-                label="Email (opcional)"
+                label="Email"
                 type="email"
                 placeholder="tu@email.com"
                 :error="errors.client_email"
+                required
                 @blur="validateField('client_email')"
               />
 

@@ -10,12 +10,26 @@ export function validatePhone(phone) {
 }
 
 /**
- * Valida un nombre
+ * Valida un nombre completo (nombre y apellido)
  * @param {string} name
  * @returns {boolean}
  */
 export function validateName(name) {
-  return name.trim().length >= 2
+  const trimmedName = name.trim()
+  
+  // Debe tener al menos 2 caracteres
+  if (trimmedName.length < 2) return false
+  
+  // Solo letras, espacios y acentos, sin números ni caracteres especiales
+  const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/
+  if (!nameRegex.test(trimmedName)) return false
+  
+  // Debe tener exactamente 2 palabras (nombre y apellido)
+  const words = trimmedName.split(/\s+/).filter(word => word.length > 0)
+  if (words.length !== 2) return false
+  
+  // Cada palabra debe tener al menos 2 caracteres
+  return words.every(word => word.length >= 2)
 }
 
 /**

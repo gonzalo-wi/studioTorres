@@ -75,6 +75,11 @@ const routes = [
         path: 'barbers/:id',
         name: 'admin-barber-detail',
         component: () => import('@/pages/admin/AdminBarberDetail.vue')
+      },
+      {
+        path: 'reports',
+        name: 'admin-reports',
+        component: () => import('@/pages/admin/ReportsPage.vue')
       }
     ]
   }

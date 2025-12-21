@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import Card from '@/components/Card.vue'
 import { RouterLink } from 'vue-router'
 import BaseButton from '@/components/BaseButton.vue'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import { fetchServices } from '@/services/servicesService'
 
 const services = ref([])
@@ -37,10 +38,10 @@ const formatPrice = (price) => {
     <div class="container mx-auto px-4">
       <!-- Header -->
       <div class="text-center mb-16">
-        <h1 class="text-5xl font-display font-bold text-white mb-4">
+        <h1 class="text-5xl font-display font-bold text-dark-900 mb-4">
           Nuestros Servicios
         </h1>
-        <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+        <p class="text-dark-600 text-lg max-w-2xl mx-auto">
           Servicios profesionales diseñados para realzar tu estilo personal. 
           Calidad garantizada en cada detalle.
         </p>
@@ -48,8 +49,7 @@ const formatPrice = (price) => {
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
-        <p class="text-gray-400 mt-4">Cargando servicios...</p>
+        <LoadingSpinner size="lg" text="Cargando servicios..." />
       </div>
 
       <!-- Error State -->
@@ -71,33 +71,43 @@ const formatPrice = (price) => {
         >
           <!-- Featured Badge -->
           <div v-if="service.is_featured" class="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
-            <span class="bg-primary-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-              MÁS POPULAR
+            <span class="bg-gradient-to-r from-gold-500 to-gold-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg border-2 border-white">
+              ⭐ MÁS POPULAR
             </span>
           </div>
 
           <Card
             hover
             :class="[
-              service.is_featured && 'ring-2 ring-primary-600'
+              'relative overflow-hidden',
+              service.is_featured && 'ring-2 ring-gold-400 shadow-xl shadow-gold-500/20'
             ]"
           >
-            <div class="p-6">
+            <!-- Gradient background for featured -->
+            <div v-if="service.is_featured" class="absolute inset-0 bg-gradient-to-br from-gold-50 via-white to-gold-50 opacity-50"></div>
+            
+            <div class="p-8 relative z-10">
               <!-- Header -->
-              <div class="flex justify-between items-start mb-4">
+              <div class="flex justify-between items-start mb-6">
                 <div class="flex-1">
-                  <h3 class="text-2xl font-display font-bold text-white mb-1">
+                  <h3 class="text-2xl font-display font-bold text-dark-900 mb-2">
                     {{ service.title }}
                   </h3>
-                  <p class="text-gray-400 text-sm">{{ service.duration_minutes }} minutos</p>
+                  <p class="text-dark-600 text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {{ service.duration_minutes }} minutos
+                  </p>
                 </div>
                 <div class="text-right ml-4">
-                  <p class="text-3xl font-bold text-primary-500">{{ formatPrice(service.price) }}</p>
+                  <p class="text-sm text-dark-600 font-semibold mb-1">Precio</p>
+                  <p class="text-3xl font-bold bg-gradient-to-r from-gold-600 to-gold-700 bg-clip-text text-transparent">{{ formatPrice(service.price) }}</p>
                 </div>
               </div>
 
             <!-- Description -->
-            <p class="text-gray-300 mb-4">
+            <p class="text-dark-700 mb-6 leading-relaxed">
               {{ service.description }}
             </p>
 
@@ -121,11 +131,11 @@ const formatPrice = (price) => {
 
       <!-- Info Section -->
       <div class="max-w-4xl mx-auto">
-        <Card class="p-8 text-center">
-          <h2 class="text-2xl font-display font-bold text-white mb-4">
+        <Card class="p-8 text-center bg-gradient-to-br from-gold-50 to-white">
+          <h2 class="text-2xl font-display font-bold text-dark-900 mb-4">
             ¿Necesitás ayuda para elegir?
           </h2>
-          <p class="text-gray-300 mb-6">
+          <p class="text-dark-700 mb-6">
             Si no estás seguro qué servicio elegir, podés consultarnos por WhatsApp 
             o venir directamente. Te asesoramos sin compromiso.
           </p>

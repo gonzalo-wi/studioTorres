@@ -49,10 +49,9 @@ const testimonials = [
 <template>
   <div>
     <!-- Hero Section -->
-    <section class="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-      <!-- Background gradient -->
-      <div class="absolute inset-0 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950"></div>
-      <div class="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+    <section class="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-white via-gold-50 to-white">
+      <!-- Background pattern -->
+      <div class="absolute inset-0 bg-[url('/grid.svg')] opacity-5"></div>
       
       <!-- Content -->
       <div class="container mx-auto px-4 relative z-10">
@@ -67,19 +66,19 @@ const testimonials = [
           </div>
           
           <div class="mb-6 inline-block">
-            <span class="px-4 py-2 bg-primary-600/10 border border-primary-600/20 rounded-full text-primary-500 text-sm font-semibold">
+            <span class="px-4 py-2 bg-gold-100 border border-gold-300 rounded-full text-gold-800 text-sm font-semibold">
               Barbería Profesional en Ciudadela
             </span>
           </div>
           
-          <h1 class="text-5xl md:text-7xl font-display font-extrabold text-white mb-6 leading-tight">
+          <h1 class="text-5xl md:text-7xl font-display font-extrabold text-dark-900 mb-6 leading-tight">
             Tu Estilo,<br>
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-primary-700">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold-500 to-gold-700">
               Nuestra Pasión
             </span>
           </h1>
           
-          <p class="text-xl text-gray-400 mb-12 max-w-2xl mx-auto">
+          <p class="text-xl text-dark-600 mb-12 max-w-2xl mx-auto">
             Cortes modernos y clásicos con técnicas profesionales. 
             Experiencia única en un ambiente masculino y elegante.
           </p>
@@ -102,20 +101,20 @@ const testimonials = [
       
       <!-- Scroll indicator -->
       <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 text-gold-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
         </svg>
       </div>
     </section>
 
     <!-- Features Section -->
-    <section class="py-20 bg-dark-900">
+    <section class="py-20 bg-gray-50">
       <div class="container mx-auto px-4">
         <div class="text-center mb-16">
-          <h2 class="text-4xl font-display font-bold text-white mb-4">
+          <h2 class="text-4xl font-display font-bold text-dark-900 mb-4">
             ¿Por qué elegirnos?
           </h2>
-          <p class="text-gray-400 text-lg">
+          <p class="text-dark-600 text-lg">
             Calidad, profesionalismo y atención al detalle en cada servicio
           </p>
         </div>
@@ -128,25 +127,25 @@ const testimonials = [
             class="p-6 text-center"
           >
             <div class="mb-4 flex justify-center">
-              <component :is="feature.icon" class="w-12 h-12 text-primary-500" />
+              <component :is="feature.icon" class="w-12 h-12 text-gold-600" />
             </div>
-            <h3 class="text-xl font-display font-bold text-white mb-2">
+            <h3 class="text-xl font-display font-bold text-dark-900 mb-2">
               {{ feature.title }}
             </h3>
-            <p class="text-gray-400">{{ feature.description }}</p>
+            <p class="text-dark-600">{{ feature.description }}</p>
           </Card>
         </div>
       </div>
     </section>
 
     <!-- Testimonials Section -->
-    <section class="py-20">
+    <section class="py-20 bg-white">
       <div class="container mx-auto px-4">
         <div class="text-center mb-16">
-          <h2 class="text-4xl font-display font-bold text-white mb-4">
+          <h2 class="text-4xl font-display font-bold text-dark-900 mb-4">
             Lo que dicen nuestros clientes
           </h2>
-          <p class="text-gray-400 text-lg">
+          <p class="text-dark-600 text-lg">
             Tu satisfacción es nuestra mejor recompensa
           </p>
         </div>
@@ -158,12 +157,12 @@ const testimonials = [
             class="p-6"
           >
             <div class="flex mb-3">
-              <span v-for="star in testimonial.rating" :key="star" class="text-yellow-500 text-xl">⭐</span>
+              <span v-for="star in testimonial.rating" :key="star" class="text-gold-500 text-xl">⭐</span>
             </div>
-            <p class="text-gray-300 mb-4 italic">
+            <p class="text-dark-700 mb-4 italic">
               "{{ testimonial.text }}"
             </p>
-            <p class="text-white font-semibold">
+            <p class="text-dark-900 font-semibold">
               - {{ testimonial.name }}
             </p>
           </Card>
@@ -172,7 +171,7 @@ const testimonials = [
     </section>
 
     <!-- CTA Section -->
-    <section class="py-20 bg-gradient-to-r from-primary-600 to-primary-700">
+    <section class="py-20 bg-gradient-to-r from-gold-500 to-gold-600">
       <div class="container mx-auto px-4 text-center">
         <h2 class="text-4xl font-display font-bold text-white mb-6">
           ¿Listo para tu nuevo look?

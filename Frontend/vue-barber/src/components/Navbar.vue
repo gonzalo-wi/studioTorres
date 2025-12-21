@@ -36,7 +36,7 @@ const navLinks = [
 <template>
   <header 
     class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-    :class="isScrolled ? 'bg-dark-900/95 backdrop-blur-sm shadow-lg' : 'bg-transparent'"
+    :class="isScrolled ? 'bg-white/95 backdrop-blur-sm shadow-lg' : 'bg-white/90'"
   >
     <nav class="container mx-auto px-4 py-4">
       <div class="flex items-center justify-between">
@@ -47,7 +47,7 @@ const navLinks = [
             alt="Hernán Barber Logo" 
             class="h-12 w-auto transition-transform group-hover:scale-105"
           />
-          <span class="text-xl font-display font-bold text-white group-hover:text-primary-500 transition-colors hidden sm:inline">
+          <span class="text-xl font-display font-bold text-dark-900 group-hover:text-gold-600 transition-colors hidden sm:inline">
             Studio Torres
           </span>
         </RouterLink>
@@ -61,8 +61,8 @@ const navLinks = [
             :class="[
               'font-semibold transition-colors duration-200',
               link.highlight 
-                ? 'bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg' 
-                : 'text-gray-300 hover:text-white'
+                ? 'bg-gold-500 hover:bg-gold-600 text-white px-6 py-3 rounded-lg shadow-md shadow-gold-500/30' 
+                : 'text-dark-600 hover:text-gold-600'
             ]"
           >
             {{ link.label }}
@@ -72,7 +72,7 @@ const navLinks = [
         <!-- Mobile Menu Button -->
         <button
           @click="toggleMenu"
-          class="md:hidden text-white p-2 hover:bg-dark-800 rounded-lg transition-colors"
+          class="md:hidden text-dark-900 p-2 hover:bg-gold-50 rounded-lg transition-colors"
           aria-label="Toggle menu"
         >
           <svg v-if="!isMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,8 +102,8 @@ const navLinks = [
             :class="[
               'block px-4 py-3 rounded-lg font-semibold transition-colors',
               link.highlight 
-                ? 'bg-primary-600 hover:bg-primary-700 text-white text-center' 
-                : 'text-gray-300 hover:text-white hover:bg-dark-800'
+                ? 'bg-gold-500 hover:bg-gold-600 text-white text-center' 
+                : 'text-dark-600 hover:text-gold-600 hover:bg-gold-50'
             ]"
           >
             {{ link.label }}

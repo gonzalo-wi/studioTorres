@@ -23,8 +23,8 @@ const handleClick = () => {
   <div
     @click="handleClick"
     :class="[
-      'bg-dark-900 border border-dark-800 rounded-lg overflow-hidden',
-      hover && 'transition-all duration-300 hover:border-primary-600 hover:shadow-lg hover:shadow-primary-600/20',
+      'bg-white border-2 border-gold-200/50 rounded-xl overflow-hidden shadow-lg shadow-gray-200/50',
+      hover && 'transition-all duration-300 hover:border-gold-400 hover:shadow-2xl hover:shadow-gold-500/30 hover:-translate-y-2',
       clickable && 'cursor-pointer'
     ]"
   >

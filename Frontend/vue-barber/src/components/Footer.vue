@@ -15,7 +15,7 @@ const schedules = [
 </script>
 
 <template>
-  <footer class="bg-dark-900 border-t border-dark-800 mt-20">
+  <footer class="bg-gray-100 border-t border-gold-200 mt-20">
     <div class="container mx-auto px-4 py-12">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <!-- Brand -->
@@ -26,9 +26,9 @@ const schedules = [
               alt="Hernán Barber Logo" 
               class="h-10 w-auto"
             />
-            <span class="text-xl font-display font-bold text-white">Hernán Barber</span>
+            <span class="text-xl font-display font-bold text-dark-900">Hernán Barber</span>
           </div>
-          <p class="text-gray-400 text-sm">
+          <p class="text-dark-600 text-sm">
             Barbería profesional especializada en cortes modernos y clásicos. 
             Estilo, calidad y atención personalizada.
           </p>
@@ -36,19 +36,19 @@ const schedules = [
 
         <!-- Horarios -->
         <div>
-          <h3 class="text-white font-display font-bold text-lg mb-4">Horarios</h3>
+          <h3 class="text-dark-900 font-display font-bold text-lg mb-4">Horarios</h3>
           <ul class="space-y-2">
             <li v-for="schedule in schedules" :key="schedule.days" class="text-sm">
-              <span class="text-gray-400">{{ schedule.days }}:</span>
-              <span class="text-white font-semibold ml-2">{{ schedule.hours }}</span>
+              <span class="text-dark-600">{{ schedule.days }}:</span>
+              <span class="text-dark-900 font-semibold ml-2">{{ schedule.hours }}</span>
             </li>
           </ul>
         </div>
 
         <!-- Contacto y Redes -->
         <div>
-          <h3 class="text-white font-display font-bold text-lg mb-4">Contacto</h3>
-          <p class="text-gray-400 text-sm mb-4">
+          <h3 class="text-dark-900 font-display font-bold text-lg mb-4">Contacto</h3>
+          <p class="text-dark-600 text-sm mb-4">
             📍 Eduardo Comesaña 2588, Ciudadela<br>
             📞 +54 9 11 5104-6978<br>
             ✉️ info@studio.torres.com
@@ -61,7 +61,7 @@ const schedules = [
               target="_blank"
               rel="noopener noreferrer"
               :aria-label="social.label"
-              class="w-10 h-10 bg-dark-800 hover:bg-dark-700 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+              class="w-10 h-10 bg-gold-100 hover:bg-gold-200 rounded-lg flex items-center justify-center transition-all hover:scale-110 border border-gold-300"
             >
               <img 
                 :src="social.svg" 
@@ -74,8 +74,8 @@ const schedules = [
       </div>
 
       <!-- Copyright -->
-      <div class="border-t border-dark-800 mt-8 pt-8 text-center">
-        <p class="text-gray-400 text-sm">
+      <div class="border-t border-gold-200 mt-8 pt-8 text-center">
+        <p class="text-dark-600 text-sm">
           © {{ currentYear }} Studio Torres. Todos los derechos reservados.
         </p>
       </div>

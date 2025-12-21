@@ -82,5 +82,9 @@ Route::prefix('admin')->group(function () {
         // Gallery
         Route::post('/gallery', [AdminGalleryController::class, 'store']);
         Route::delete('/gallery/{galleryItem}', [AdminGalleryController::class, 'destroy']);
+
+        // Reports
+        Route::get('/reports', [AdminAppointmentController::class, 'reports']);
+        Route::get('/reports/export', [AdminAppointmentController::class, 'exportReports']);
     });
 });

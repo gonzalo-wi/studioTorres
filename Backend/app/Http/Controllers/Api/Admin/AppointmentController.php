@@ -112,4 +112,137 @@ class AppointmentController extends Controller
         
         return $this->success($lastSixMonths);
     }
+
+    /**
+     * GET /api/admin/reports?start_date=&end_date=
+     */
+    public function reports(Request $request)
+    {
+        $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->input('end_date', now()->format('Y-m-d'));
+
+        \Log::info('Cargando reportes', ['start_date' => $startDate, 'end_date' => $endDate]);
+
+        // Estadísticas por barbero
+        $barberStats = \DB::select("
+            SELECT 
+                b.id as barber_id,
+                b.name as barber_name,
+                COUNT(a.id) as total_appointments,
+                COALESCE(SUM(CASE WHEN a.status = 'CONFIRMED' THEN 1 ELSE 0 END), 0) as confirmed_appointments,
+                COALESCE(SUM(CASE WHEN a.status = 'PENDING' THEN 1 ELSE 0 END), 0) as pending_appointments,
+                COALESCE(SUM(CASE WHEN a.status = 'CANCELLED' THEN 1 ELSE 0 END), 0) as cancelled_appointments,
+                COALESCE(SUM(CASE WHEN a.status = 'CONFIRMED' THEN s.price ELSE 0 END), 0) as total_revenue
+            FROM barbers b
+            LEFT JOIN appointments a ON b.id = a.barber_id 
+                AND DATE(a.starts_at) BETWEEN ? AND ?
+            LEFT JOIN services s ON a.service_id = s.id
+            WHERE b.active = 1
+            GROUP BY b.id, b.name
+            HAVING total_appointments > 0
+            ORDER BY total_revenue DESC
+        ", [$startDate, $endDate]);
+
+        // Estadísticas por servicio
+        $serviceStats = \DB::select("
+            SELECT 
+                s.id as service_id,
+                s.title as service_name,
+                COUNT(a.id) as total_appointments,
+                COALESCE(SUM(CASE WHEN a.status = 'CONFIRMED' THEN s.price ELSE 0 END), 0) as total_revenue
+            FROM services s
+            INNER JOIN appointments a ON s.id = a.service_id 
+                AND DATE(a.starts_at) BETWEEN ? AND ?
+            WHERE s.active = 1
+            GROUP BY s.id, s.title, s.price
+            HAVING total_appointments > 0
+            ORDER BY total_appointments DESC
+        ", [$startDate, $endDate]);
+
+        // Resumen general
+        $totalAppointments = Appointment::whereDate('starts_at', '>=', $startDate)
+            ->whereDate('starts_at', '<=', $endDate)
+            ->count();
+
+        $totalRevenue = Appointment::whereDate('starts_at', '>=', $startDate)
+            ->whereDate('starts_at', '<=', $endDate)
+            ->where('status', 'CONFIRMED')
+            ->join('services', 'appointments.service_id', '=', 'services.id')
+            ->sum('services.price');
+
+        $confirmedCount = Appointment::whereDate('starts_at', '>=', $startDate)
+            ->whereDate('starts_at', '<=', $endDate)
+            ->where('status', 'CONFIRMED')
+            ->count();
+
+        $summary = [
+            'total_appointments' => $totalAppointments,
+            'total_revenue' => (float)$totalRevenue,
+            'average_ticket' => $confirmedCount > 0 ? (float)$totalRevenue / $confirmedCount : 0
+        ];
+
+        \Log::info('Reportes cargados', [
+            'barbers' => count($barberStats),
+            'services' => count($serviceStats),
+            'summary' => $summary
+        ]);
+
+        return $this->success([
+            'barber_stats' => $barberStats,
+            'service_stats' => $serviceStats,
+            'summary' => $summary
+        ]);
+    }
+
+    /**
+     * GET /api/admin/reports/export?start_date=&end_date=
+     */
+    public function exportReports(Request $request)
+    {
+        $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->input('end_date', now()->format('Y-m-d'));
+
+        // Obtener datos
+        $barberStats = \DB::select("
+            SELECT 
+                b.name as 'Barbero',
+                COUNT(a.id) as 'Total Turnos',
+                SUM(CASE WHEN a.status = 'CONFIRMED' THEN 1 ELSE 0 END) as 'Confirmados',
+                SUM(CASE WHEN a.status = 'PENDING' THEN 1 ELSE 0 END) as 'Pendientes',
+                SUM(CASE WHEN a.status = 'CANCELLED' THEN 1 ELSE 0 END) as 'Cancelados',
+                SUM(CASE WHEN a.status = 'CONFIRMED' THEN s.price ELSE 0 END) as 'Ingresos Totales'
+            FROM barbers b
+            LEFT JOIN appointments a ON b.id = a.barber_id 
+                AND DATE(a.starts_at) BETWEEN ? AND ?
+            LEFT JOIN services s ON a.service_id = s.id
+            GROUP BY b.id, b.name
+            ORDER BY 'Ingresos Totales' DESC
+        ", [$startDate, $endDate]);
+
+        // Crear archivo CSV
+        $filename = "reporte_barberia_{$startDate}_{$endDate}.csv";
+        $handle = fopen('php://temp', 'r+');
+        
+        // BOM para UTF-8
+        fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        // Headers
+        if (count($barberStats) > 0) {
+            fputcsv($handle, array_keys((array)$barberStats[0]), ';');
+            
+            // Datos
+            foreach ($barberStats as $row) {
+                fputcsv($handle, (array)$row, ';');
+            }
+        }
+        
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
 }

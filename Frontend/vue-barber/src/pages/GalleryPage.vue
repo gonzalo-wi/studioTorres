@@ -51,10 +51,10 @@ import { computed } from 'vue'
     <div class="container mx-auto px-4">
       <!-- Header -->
       <div class="text-center mb-12">
-        <h1 class="text-5xl font-display font-bold text-white mb-4">
+        <h1 class="text-5xl font-display font-bold text-dark-900 mb-4">
           Catálogo de Trabajos
         </h1>
-        <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+        <p class="text-dark-600 text-lg max-w-2xl mx-auto">
           Explorá nuestros trabajos más recientes. 
           Cada corte es único y personalizado para cada cliente.
         </p>
@@ -69,8 +69,8 @@ import { computed } from 'vue'
           :class="[
             'px-6 py-3 rounded-lg font-semibold transition-all duration-200',
             selectedCategory === category.id
-              ? 'bg-primary-600 text-white'
-              : 'bg-dark-800 text-gray-300 hover:bg-dark-700 hover:text-white'
+              ? 'bg-gold-500 text-white shadow-md'
+              : 'bg-white border-2 border-gold-200 text-dark-700 hover:bg-gold-50 hover:border-gold-400'
           ]"
         >
           {{ category.label }}
@@ -96,7 +96,7 @@ import { computed } from 'vue'
             />
             
             <!-- Hover overlay -->
-            <div class="absolute inset-0 bg-primary-600/0 group-hover:bg-primary-600/20 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+            <div class="absolute inset-0 bg-gold-600/0 group-hover:bg-gold-600/20 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
               <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
               </svg>
@@ -104,14 +104,14 @@ import { computed } from 'vue'
           </div>
           
           <div class="p-4">
-            <h3 class="text-white font-semibold">{{ image.alt }}</h3>
+            <h3 class="text-dark-900 font-semibold">{{ image.alt }}</h3>
           </div>
         </Card>
       </div>
 
       <!-- Empty state -->
       <div v-if="filteredGallery.length === 0" class="text-center py-20">
-        <p class="text-gray-400 text-lg">
+        <p class="text-dark-600 text-lg">
           No hay imágenes en esta categoría todavía.
         </p>
       </div>
@@ -131,7 +131,7 @@ import { computed } from 'vue'
             class="w-full h-auto object-contain max-h-[70vh]"
           />
         </div>
-        <h3 class="text-2xl font-display font-bold text-white">
+        <h3 class="text-2xl font-display font-bold text-dark-900">
           {{ selectedImage.alt }}
         </h3>
       </div>

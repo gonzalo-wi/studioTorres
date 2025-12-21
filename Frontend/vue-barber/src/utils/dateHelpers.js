@@ -85,12 +85,12 @@ export function getTodayDate() {
 }
 
 /**
- * Obtiene la fecha máxima para reservas (30 días desde hoy)
+ * Obtiene la fecha máxima para reservas (7 días desde hoy)
  * @returns {string}
  */
 export function getMaxDate() {
   const today = new Date()
-  const maxDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000)
+  const maxDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
   return maxDate.toISOString().split('T')[0]
 }
 

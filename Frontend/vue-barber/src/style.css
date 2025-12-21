@@ -6,7 +6,7 @@
 
 @layer base {
   body {
-    @apply bg-dark-950 text-gray-100 antialiased;
+    @apply bg-white text-dark-900 antialiased;
   }
   
   h1, h2, h3, h4, h5, h6 {
