@@ -1,11 +1,14 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useAuth } from '@/composables/useAuth'
 import Card from '@/components/Card.vue'
 import BadgeStatus from '@/components/BadgeStatus.vue'
 import { getBookingStats, getMonthlyStats, fetchBookings } from '@/services/bookingsService'
 import { formatDate } from '@/utils/dateHelpers'
 import { CalendarDaysIcon, ClockIcon, CheckCircleIcon, XCircleIcon, CurrencyDollarIcon, ChartBarIcon } from '@heroicons/vue/24/outline'
+
+const { user } = useAuth()
 
 const stats = ref({
   today: 0,
@@ -19,6 +22,8 @@ const monthlyData = ref([])
 const todayBookings = ref([])
 const loading = ref(true)
 const selectedMonth = ref(new Date().toISOString().split('T')[0].substring(0, 7))
+
+const isBarber = computed(() => user.value?.role === 'BARBER')
 
 const loadBookingsForMonth = async () => {
   try {
@@ -41,13 +46,15 @@ watch(selectedMonth, loadBookingsForMonth)
 
 onMounted(async () => {
   try {
-    const [statsData, monthly] = await Promise.all([
-      getBookingStats(),
-      getMonthlyStats()
-    ])
-    
+    const statsData = await getBookingStats()
     stats.value = statsData
-    monthlyData.value = monthly
+    
+    // Solo cargar estadísticas mensuales para ADMIN
+    if (!isBarber.value) {
+      const monthly = await getMonthlyStats()
+      monthlyData.value = monthly
+    }
+    
     await loadBookingsForMonth()
   } catch (error) {
     console.error('Error cargando dashboard:', error)
@@ -56,32 +63,65 @@ onMounted(async () => {
   }
 })
 
-const statCards = computed(() => [
-  {
-    label: 'Turnos Hoy',
-    value: stats.value.today_appointments || 0,
-    icon: CalendarDaysIcon,
-    color: 'bg-blue-500/10 text-blue-500 border-blue-500/20'
-  },
-  {
-    label: 'Pendientes',
-    value: stats.value.pending || 0,
-    icon: ClockIcon,
-    color: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-  },
-  {
-    label: 'Confirmados',
-    value: stats.value.confirmed || 0,
-    icon: CheckCircleIcon,
-    color: 'bg-green-500/10 text-green-500 border-green-500/20'
-  },
-  {
-    label: 'Cancelados Hoy',
-    value: stats.value.cancelled_today || 0,
-    icon: XCircleIcon,
-    color: 'bg-red-500/10 text-red-500 border-red-500/20'
+const statCards = computed(() => {
+  const userRole = localStorage.getItem('user_role')
+  
+  if (userRole === 'BARBER') {
+    return [
+      {
+        label: 'Turnos Hoy',
+        value: stats.value.todayAppointments || 0,
+        icon: CalendarDaysIcon,
+        color: 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+      },
+      {
+        label: 'Pendientes',
+        value: stats.value.pendingAppointments || 0,
+        icon: ClockIcon,
+        color: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+      },
+      {
+        label: 'Confirmados Hoy',
+        value: stats.value.confirmedToday || 0,
+        icon: CheckCircleIcon,
+        color: 'bg-green-500/10 text-green-500 border-green-500/20'
+      },
+      {
+        label: 'Total del Mes',
+        value: stats.value.monthAppointments || 0,
+        icon: ChartBarIcon,
+        color: 'bg-purple-500/10 text-purple-500 border-purple-500/20'
+      }
+    ]
   }
-])
+  
+  return [
+    {
+      label: 'Turnos Hoy',
+      value: stats.value.today_appointments || 0,
+      icon: CalendarDaysIcon,
+      color: 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+    },
+    {
+      label: 'Pendientes',
+      value: stats.value.pending || 0,
+      icon: ClockIcon,
+      color: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+    },
+    {
+      label: 'Confirmados',
+      value: stats.value.confirmed || 0,
+      icon: CheckCircleIcon,
+      color: 'bg-green-500/10 text-green-500 border-green-500/20'
+    },
+    {
+      label: 'Cancelados Hoy',
+      value: stats.value.cancelled_today || 0,
+      icon: XCircleIcon,
+      color: 'bg-red-500/10 text-red-500 border-red-500/20'
+    }
+  ]
+})
 
 const totalMonthlyRevenue = computed(() => {
   return monthlyData.value.reduce((sum, month) => sum + (month.revenue || 0), 0)
@@ -139,8 +179,8 @@ const maxAppointments = computed(() => {
         </Card>
       </div>
 
-      <!-- Monthly Stats Section -->
-      <div class="grid lg:grid-cols-2 gap-6 md:gap-8">
+      <!-- Monthly Stats Section (Solo para ADMIN) -->
+      <div v-if="!isBarber" class="grid lg:grid-cols-2 gap-6 md:gap-8">
         <!-- Appointments Chart -->
         <div class="bg-white border border-gold-200 rounded-xl overflow-hidden shadow-lg">
           <div class="bg-gradient-to-r from-gold-500 to-gold-600 px-4 py-3 md:px-6 md:py-4">

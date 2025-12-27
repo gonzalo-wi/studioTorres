@@ -21,6 +21,11 @@ const props = defineProps({
   fullWidth: {
     type: Boolean,
     default: false
+  },
+  type: {
+    type: String,
+    default: 'button',
+    validator: (value) => ['button', 'submit', 'reset'].includes(value)
   }
 })
 
@@ -60,6 +65,7 @@ import { computed } from 'vue'
 
 <template>
   <button
+    :type="type"
     :class="buttonClasses"
     :disabled="disabled || loading"
     @click="handleClick"

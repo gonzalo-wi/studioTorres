@@ -88,6 +88,28 @@ Excepciones/ausencias de barberos.
 INDEX (barber_id, starts_at, ends_at)
 ```
 
+### 7. **waitlist**
+Lista de espera para notificación cuando se liberan turnos.
+```sql
+- id (PK)
+- client_name
+- client_phone
+- client_email (nullable)
+- service_id (FK -> services.id)
+- preferred_date (date)
+- preferred_time_start (time, nullable)
+- preferred_time_end (time, nullable)
+- barber_id (FK -> barbers.id, nullable)
+- status (ENUM: 'WAITING', 'NOTIFIED', 'CONVERTED', 'EXPIRED')
+- notified_at (datetime, nullable)
+- expires_at (datetime, nullable)
+- created_at
+- updated_at
+
+INDEX (service_id, preferred_date, status)
+INDEX (status, expires_at)
+```
+
 ## Relaciones
 
 - `users` 1:1 `barbers` (un user puede ser barbero)
@@ -95,6 +117,8 @@ INDEX (barber_id, starts_at, ends_at)
 - `services` 1:N `appointments` (un servicio se usa en muchos turnos)
 - `barbers` 1:N `barber_schedules` (un barbero tiene múltiples horarios semanales)
 - `barbers` 1:N `barber_time_off` (un barbero puede tener múltiples ausencias)
+- `services` 1:N `waitlist` (un servicio puede tener múltiples entradas en lista de espera)
+- `barbers` 1:N `waitlist` (un barbero puede ser preferido por múltiples clientes en espera)
 
 ## Mejoras Implementadas
 
@@ -109,6 +133,17 @@ INDEX (barber_id, starts_at, ends_at)
    - UNIQUE constraint en (barber_id, starts_at) para prevenir doble booking
 ✅ **barber_schedules**: Modela horarios disponibles por día de semana  
 ✅ **barber_time_off**: Modela excepciones/ausencias con rango datetime
+✅ **waitlist**: Sistema de lista de espera inteligente con notificaciones automáticas
+
+## Nuevas Funcionalidades
+
+### 🔔 Sistema de Lista de Espera (Waitlist)
+- Notificación automática cuando se cancela un turno
+- Preferencias flexibles de horario
+- Ventana de confirmación de 2 horas
+- Prioridad FIFO (First In, First Out)
+- Auto-expiración después de 7 días
+- Ver [WAITLIST_README.md](../../WAITLIST_README.md) para más detalles
 
 ## Validaciones Recomendadas
 

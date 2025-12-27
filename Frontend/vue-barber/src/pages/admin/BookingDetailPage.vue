@@ -79,14 +79,14 @@ const canCancel = computed(() =>
       <div>
         <button
           @click="goBack"
-          class="text-gray-400 hover:text-white mb-2 flex items-center text-sm"
+          class="text-dark-600 hover:text-gold-600 mb-2 flex items-center text-sm"
         >
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
           Volver a turnos
         </button>
-        <h1 class="text-3xl font-display font-bold text-white">
+        <h1 class="text-3xl font-display font-bold text-dark-800">
           Detalle del Turno
         </h1>
       </div>
@@ -94,8 +94,8 @@ const canCancel = computed(() =>
 
     <!-- Loading -->
     <div v-if="loading" class="text-center py-12">
-      <ClockIcon class="w-12 h-12 mx-auto mb-4 text-gray-400 animate-pulse" />
-      <p class="text-gray-400">Cargando información...</p>
+      <ClockIcon class="w-12 h-12 mx-auto mb-4 text-gold-500 animate-pulse" />
+      <p class="text-dark-600">Cargando información...</p>
     </div>
 
     <!-- Content -->
@@ -106,13 +106,13 @@ const canCancel = computed(() =>
         <Card class="p-6">
           <div class="flex items-center justify-between mb-6">
             <div>
-              <h2 class="text-xl font-display font-bold text-white mb-2">
+              <h2 class="text-xl font-display font-bold text-dark-800 mb-2">
                 Estado de la Reserva
               </h2>
               <BadgeStatus :status="booking.status" />
             </div>
-            <div class="text-gray-400 text-sm text-right">
-              <p>ID: <span class="font-mono text-white">#{{ booking.id }}</span></p>
+            <div class="text-dark-600 text-sm text-right">
+              <p>ID: <span class="font-mono text-dark-800">#{{ booking.id }}</span></p>
               <p v-if="booking.createdAt" class="mt-1">
                 Creado: {{ new Date(booking.createdAt).toLocaleString('es-AR') }}
               </p>
@@ -154,29 +154,29 @@ const canCancel = computed(() =>
 
         <!-- Booking Details -->
         <Card class="p-6">
-          <h2 class="text-xl font-display font-bold text-white mb-6">
+          <h2 class="text-xl font-display font-bold text-dark-800 mb-6">
             Información del Turno
           </h2>
 
           <div class="space-y-4">
-            <div class="flex py-3 border-b border-dark-800">
-              <div class="w-1/3 text-gray-400">Servicio:</div>
-              <div class="w-2/3 text-white font-semibold">{{ booking.serviceName }}</div>
+            <div class="flex py-3 border-b border-gray-200">
+              <div class="w-1/3 text-dark-600">Servicio:</div>
+              <div class="w-2/3 text-dark-800 font-semibold">{{ booking.serviceName }}</div>
             </div>
 
-            <div class="flex py-3 border-b border-dark-800">
-              <div class="w-1/3 text-gray-400">Fecha:</div>
-              <div class="w-2/3 text-white font-semibold">{{ formatDate(booking.date) }}</div>
+            <div class="flex py-3 border-b border-gray-200">
+              <div class="w-1/3 text-dark-600">Fecha:</div>
+              <div class="w-2/3 text-dark-800 font-semibold">{{ formatDate(booking.date) }}</div>
             </div>
 
-            <div class="flex py-3 border-b border-dark-800">
-              <div class="w-1/3 text-gray-400">Hora:</div>
-              <div class="w-2/3 text-white font-semibold text-lg">{{ booking.time }}</div>
+            <div class="flex py-3 border-b border-gray-200">
+              <div class="w-1/3 text-dark-600">Hora:</div>
+              <div class="w-2/3 text-dark-800 font-semibold text-lg">{{ booking.time }}</div>
             </div>
 
             <div v-if="booking.observations" class="flex py-3">
-              <div class="w-1/3 text-gray-400">Observaciones:</div>
-              <div class="w-2/3 text-white">{{ booking.observations }}</div>
+              <div class="w-1/3 text-dark-600">Observaciones:</div>
+              <div class="w-2/3 text-dark-800">{{ booking.observations }}</div>
             </div>
           </div>
         </Card>
@@ -185,24 +185,24 @@ const canCancel = computed(() =>
       <!-- Client Info -->
       <div class="space-y-6">
         <Card class="p-6">
-          <h2 class="text-xl font-display font-bold text-white mb-6">
+          <h2 class="text-xl font-display font-bold text-dark-800 mb-6">
             Datos del Cliente
           </h2>
 
           <div class="space-y-4">
             <div>
-              <p class="text-gray-400 text-sm mb-1">Nombre:</p>
-              <p class="text-white font-semibold text-lg">{{ booking.name }}</p>
+              <p class="text-dark-600 text-sm mb-1">Nombre:</p>
+              <p class="text-dark-800 font-semibold text-lg">{{ booking.name }}</p>
             </div>
 
             <div>
-              <p class="text-gray-400 text-sm mb-1">Teléfono:</p>
-              <p class="text-white font-semibold">{{ booking.phone }}</p>
+              <p class="text-dark-600 text-sm mb-1">Teléfono:</p>
+              <p class="text-dark-800 font-semibold">{{ booking.phone }}</p>
               <a
                 :href="`https://wa.me/${booking.phone.replace(/\D/g, '')}`"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="text-primary-500 hover:text-primary-400 text-sm mt-2 inline-flex items-center gap-1"
+                class="text-gold-600 hover:text-gold-700 text-sm mt-2 inline-flex items-center gap-1"
               >
                 <ChatBubbleLeftIcon class="w-4 h-4" />
                 Contactar por WhatsApp →
@@ -212,12 +212,12 @@ const canCancel = computed(() =>
         </Card>
 
         <!-- Quick Actions -->
-        <Card class="p-6 bg-dark-800 border-dark-700">
-          <h3 class="text-white font-semibold mb-4">Acciones Rápidas</h3>
+        <Card class="p-6">
+          <h3 class="text-dark-800 font-semibold mb-4">Acciones Rápidas</h3>
           <div class="space-y-3">
             <a
               :href="`tel:${booking.phone}`"
-              class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-dark-900 hover:bg-dark-700 text-white rounded-lg transition-colors"
+              class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gold-600 hover:bg-gold-700 text-white rounded-lg transition-colors"
             >
               <PhoneIcon class="w-5 h-5" />
               Llamar
@@ -226,7 +226,7 @@ const canCancel = computed(() =>
               :href="`https://wa.me/${booking.phone.replace(/\D/g, '')}?text=Hola ${booking.name}, te contacto desde Hernán Barber respecto a tu turno del ${booking.date} a las ${booking.time}.`"
               target="_blank"
               rel="noopener noreferrer"
-              class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-dark-900 hover:bg-dark-700 text-white rounded-lg transition-colors"
+              class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gold-600 hover:bg-gold-700 text-white rounded-lg transition-colors"
             >
               <ChatBubbleLeftIcon class="w-5 h-5" />
               WhatsApp
@@ -242,7 +242,7 @@ const canCancel = computed(() =>
       @close="showCancelModal = false"
       title="Cancelar Turno"
     >
-      <p class="text-gray-300 mb-6">
+      <p class="text-dark-700 mb-6">
         ¿Estás seguro que querés cancelar este turno? Esta acción no se puede deshacer.
       </p>
 

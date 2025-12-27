@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { RouterLink, useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { 
@@ -15,7 +15,7 @@ import {
 
 const router = useRouter()
 const route = useRoute()
-const { logout } = useAuth()
+const { logout, user } = useAuth()
 const sidebarOpen = ref(false)
 
 const handleLogout = () => {
@@ -23,13 +23,25 @@ const handleLogout = () => {
   router.push('/admin/login')
 }
 
-const navLinks = [
+// Menú completo para ADMIN
+const allNavLinks = [
   { to: '/admin', label: 'Dashboard', icon: ChartBarIcon, exact: true },
   { to: '/admin/bookings', label: 'Turnos', icon: CalendarDaysIcon },
   { to: '/admin/barbers', label: 'Barberos', icon: UsersIcon },
   { to: '/admin/services', label: 'Servicios', icon: Squares2X2Icon },
   { to: '/admin/reports', label: 'Reportes', icon: DocumentChartBarIcon }
 ]
+
+// Menú limitado para BARBER
+const barberNavLinks = [
+  { to: '/admin', label: 'Dashboard', icon: ChartBarIcon, exact: true },
+  { to: '/admin/bookings', label: 'Mis Turnos', icon: CalendarDaysIcon }
+]
+
+// Mostrar menú según rol
+const navLinks = computed(() => {
+  return user.value?.role === 'BARBER' ? barberNavLinks : allNavLinks
+})
 
 const closeSidebar = () => {
   sidebarOpen.value = false
@@ -176,7 +188,7 @@ const isActive = (link) => {
       </header>
 
       <!-- Main Content -->
-      <main class="flex-1 p-6 lg:p-8">
+      <main class="flex-1 p-6 lg:p-8 bg-gray-50 min-h-screen">
         <router-view />
       </main>
     </div>

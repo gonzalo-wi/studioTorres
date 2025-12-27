@@ -26,6 +26,30 @@ class AuthController extends Controller
             );
         }
 
+        // Permitir login solo a ADMIN y BARBER
+        if (!in_array($user->role, ['ADMIN', 'BARBER'])) {
+            return $this->error(
+                'FORBIDDEN',
+                'No tienes acceso al panel',
+                null,
+                403
+            );
+        }
+
+        // Si es BARBER, verificar que tenga perfil de barbero
+        $barber = null;
+        if ($user->role === 'BARBER') {
+            $barber = \App\Models\Barber::where('user_id', $user->id)->first();
+            if (!$barber) {
+                return $this->error(
+                    'FORBIDDEN',
+                    'No se encontró perfil de barbero',
+                    null,
+                    403
+                );
+            }
+        }
+
         // Create token
         $token = $user->createToken('admin-token')->plainTextToken;
 
@@ -34,6 +58,8 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'role' => $user->role,
+                'barber_id' => $barber ? $barber->id : null,
             ],
             'token' => $token,
         ]);

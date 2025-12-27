@@ -4,8 +4,11 @@ namespace App\Services;
 
 use App\Models\Appointment;
 use App\Models\Service;
+use App\Jobs\ProcessCancelledAppointmentJob;
+use App\Notifications\AppointmentConfirmedNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class AppointmentService
 {
@@ -67,8 +70,30 @@ class AppointmentService
             'client' => $appointment->client_name,
         ]);
 
-        // Load related models; Barber has no 'user' relation in current model
-        return $appointment->load(['service', 'barber']);
+        // Load related models
+        $appointment->load(['service', 'barber.user']);
+
+        // Enviar email de confirmación
+        if ($appointment->client_email) {
+            try {
+                Notification::route('mail', $appointment->client_email)
+                    ->notify(new AppointmentConfirmedNotification($appointment));
+                    
+                Log::info('Confirmation email sent', [
+                    'appointment_id' => $appointment->id,
+                    'public_code' => $appointment->public_code,
+                    'client_email' => $appointment->client_email,
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Failed to send confirmation email', [
+                    'appointment_id' => $appointment->id,
+                    'error' => $e->getMessage(),
+                ]);
+                // No lanzar excepción para no bloquear la creación del turno
+            }
+        }
+
+        return $appointment;
     }
 
     /**
@@ -76,7 +101,9 @@ class AppointmentService
      */
     public function updateAppointmentStatus(Appointment $appointment, array $data): Appointment
     {
-        DB::transaction(function () use ($appointment, $data) {
+        $wasCancelled = false;
+        
+        DB::transaction(function () use ($appointment, $data, &$wasCancelled) {
             // If rescheduling (date/time provided), validate new slot
             if (isset($data['date']) && isset($data['time'])) {
                 // Skip availability check if cancelling
@@ -102,13 +129,24 @@ class AppointmentService
                 $appointment->time = $data['time'];
             }
 
+            // Detectar cancelación para disparar Job de lista de espera
+            if ($data['status'] === 'CANCELLED' && $appointment->status !== 'CANCELLED') {
+                $wasCancelled = true;
+            }
+
             $appointment->status = $data['status'];
             $appointment->save();
         });
 
+        // Si se canceló, buscar en lista de espera
+        if ($wasCancelled) {
+            ProcessCancelledAppointmentJob::dispatch($appointment);
+        }
+
         Log::info('Appointment status updated', [
             'appointment_id' => $appointment->id,
             'new_status' => $appointment->status,
+            'waitlist_job_dispatched' => $wasCancelled,
         ]);
 
         return $appointment->fresh('service');

@@ -5,10 +5,12 @@ import BaseButton from '@/components/BaseButton.vue'
 import BaseInput from '@/components/BaseInput.vue'
 import BaseSelect from '@/components/BaseSelect.vue'
 import Card from '@/components/Card.vue'
+import WaitlistModal from '@/components/WaitlistModal.vue'
 import { useBookingForm } from '@/composables/useBookingForm'
 import { getTodayDate, getMaxDate, formatDate, isValidBookingDate } from '@/utils/dateHelpers'
 import { fetchServices, fetchAvailableSlots, createBooking } from '@/services/bookingsService'
 import { fetchBarbers } from '@/services/barbersService'
+import { ClockIcon, CurrencyDollarIcon } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
 const route = useRoute()
@@ -21,6 +23,7 @@ const barbers = ref([])
 const availableSlots = ref([])
 const loadingSlots = ref(false)
 const preSelectedService = ref(null)
+const showWaitlistModal = ref(false)
 
 // Cargar servicios y barberos al montar
 onMounted(async () => {
@@ -58,8 +61,12 @@ const barberOptions = computed(() =>
 )
 
 const selectedService = computed(() => 
-  services.value.find(s => s.id === formData.value.service_id)
+  services.value.find(s => s.id === parseInt(formData.value.service_id))
 )
+
+const selectedServiceDetails = computed(() => {
+  return selectedService.value || preSelectedService.value
+})
 
 const selectedBarber = computed(() => 
   barbers.value.find(b => b.id === formData.value.barber_id)
@@ -191,6 +198,42 @@ const handleSubmit = async () => {
     isSubmitting.value = false
   }
 }
+
+// Handler para lista de espera
+const handleWaitlistSuccess = () => {
+  showWaitlistModal.value = false
+  // Opcional: mostrar mensaje de éxito
+  alert('¡Te agregamos a la lista de espera! Te avisaremos cuando haya un turno disponible.')
+}
+
+// Abrir modal de waitlist
+const openWaitlistModal = () => {
+  // Validar que haya un servicio seleccionado
+  if (!formData.value.service_id) {
+    alert('Por favor seleccioná un servicio primero')
+    return
+  }
+  
+  // Validar que haya una fecha seleccionada
+  if (!formData.value.date) {
+    alert('Por favor seleccioná una fecha primero')
+    return
+  }
+  
+  // Validar que haya un barbero seleccionado
+  if (!formData.value.barber_id) {
+    alert('Por favor seleccioná un barbero primero')
+    return
+  }
+  
+  // Validar que el servicio exista
+  if (!selectedServiceDetails.value) {
+    alert('Error: No se pudo cargar la información del servicio')
+    return
+  }
+  
+  showWaitlistModal.value = true
+}
 </script>
 
 <template>
@@ -242,8 +285,14 @@ const handleSubmit = async () => {
               <h3 class="text-dark-900 font-semibold mb-2">Servicio seleccionado:</h3>
               <p class="text-lg font-bold text-gold-700">{{ preSelectedService.title }}</p>
               <div class="flex gap-4 mt-2 text-sm text-dark-600">
-                <span>⏱️ {{ preSelectedService.duration_minutes }} minutos</span>
-                <span>💰 ${{ preSelectedService.price }}</span>
+                <span class="flex items-center gap-1">
+                  <ClockIcon class="w-4 h-4" />
+                  {{ preSelectedService.duration_minutes }} minutos
+                </span>
+                <span class="flex items-center gap-1">
+                  <CurrencyDollarIcon class="w-4 h-4" />
+                  ${{ preSelectedService.price }}
+                </span>
               </div>
             </div>
 
@@ -259,10 +308,12 @@ const handleSubmit = async () => {
               />
 
               <div v-if="selectedService" class="mt-4 p-4 bg-gold-50 rounded-lg border border-gold-200">
-                <p class="text-dark-700 text-sm mb-2">
-                  ⏱️ <strong>Duración:</strong> {{ selectedService.duration_minutes }} minutos
+                <p class="text-dark-700 text-sm mb-2 flex items-center gap-2">
+                  <ClockIcon class="w-4 h-4 text-gold-600" />
+                  <strong>Duración:</strong> {{ selectedService.duration_minutes }} minutos
                 </p>
-                <p class="text-dark-700 text-sm">
+                <p class="text-dark-700 text-sm flex items-center gap-2">
+                  <CurrencyDollarIcon class="w-4 h-4 text-gold-600" />
                   <strong>Precio:</strong> ${{ selectedService.price }}
                 </p>
               </div>
@@ -270,14 +321,46 @@ const handleSubmit = async () => {
 
             <!-- Selector de barbero -->
             <div class="mb-6">
-              <BaseSelect
-                v-model="formData.barber_id"
-                label="Barbero"
-                :options="barberOptions"
-                :error="errors.barber_id"
-                required
-                @change="validateField('barber_id')"
-              />
+              <label class="block text-sm font-semibold text-dark-700 mb-4">
+                Barbero <span class="text-primary-500">*</span>
+              </label>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  v-for="barber in barbers"
+                  :key="barber.id"
+                  type="button"
+                  @click="formData.barber_id = barber.id; validateField('barber_id')"
+                  :class="[
+                    'relative p-4 rounded-xl border-2 transition-all text-left',
+                    formData.barber_id === barber.id
+                      ? 'bg-gold-50 border-gold-500 shadow-lg'
+                      : 'bg-white border-gold-200 hover:border-gold-400'
+                  ]"
+                >
+                  <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-full overflow-hidden bg-gray-200 border-2 border-gold-300 flex-shrink-0">
+                      <img v-if="barber.avatar_full_url" :src="barber.avatar_full_url" :alt="barber.name" 
+                        class="w-full h-full object-cover" />
+                      <div v-else class="w-full h-full flex items-center justify-center text-dark-400">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="flex-1">
+                      <p class="font-bold text-dark-800 text-lg">{{ barber.name }}</p>
+                    </div>
+                    <div v-if="formData.barber_id === barber.id" class="absolute top-2 right-2">
+                      <svg class="w-6 h-6 text-gold-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
+              </div>
+              
+              <p v-if="errors.barber_id" class="mt-2 text-sm text-red-600">{{ errors.barber_id }}</p>
             </div>
 
             <div class="mt-8 flex justify-end">
@@ -350,10 +433,34 @@ const handleSubmit = async () => {
                   </button>
                 </div>
 
-                <p v-else class="text-dark-600 text-center py-8">
-                  No hay horarios disponibles para esta fecha.
-                  Probá con otra fecha.
-                </p>
+                <!-- No hay slots - Mostrar botón de lista de espera -->
+                <div v-else class="text-center py-8">
+                  <div class="bg-gradient-to-br from-gold-50 to-gold-100 border-2 border-gold-300 rounded-xl p-8 max-w-md mx-auto shadow-md">
+                    <div class="w-16 h-16 bg-gold-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                      <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                      </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-dark-900 mb-2">No hay turnos disponibles</h3>
+                    <p class="text-dark-600 text-sm mb-6 leading-relaxed">
+                      Esta fecha está completa, pero podés unirte a la <strong class="text-gold-700">lista de espera</strong>.
+                      Te avisaremos por email si se libera un turno.
+                    </p>
+                    <BaseButton 
+                      type="button"
+                      @click="openWaitlistModal"
+                      class="bg-gold-500 hover:bg-gold-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all w-full sm:w-auto"
+                    >
+                      🔔 Unirme a Lista de Espera
+                    </BaseButton>
+                    <p class="text-xs text-dark-500 mt-4 flex items-center justify-center gap-1">
+                      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                      </svg>
+                      Notificación automática y gratuita
+                    </p>
+                  </div>
+                </div>
 
                 <p v-if="errors.time" class="mt-2 text-sm text-red-500">
                   {{ errors.time }}
@@ -472,5 +579,15 @@ const handleSubmit = async () => {
         </form>
       </Card>
     </div>
+
+    <!-- Waitlist Modal -->
+    <WaitlistModal
+      v-if="showWaitlistModal"
+      :service="selectedServiceDetails"
+      :selected-date="formData.date"
+      :barber-id="formData.barber_id"
+      @close="showWaitlistModal = false"
+      @success="handleWaitlistSuccess"
+    />
   </div>
 </template>

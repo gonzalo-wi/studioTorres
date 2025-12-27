@@ -138,4 +138,89 @@ class BarberController extends Controller
             'total' => round($total, 2),
         ]);
     }
+
+    public function createUserAccess(Request $request, Barber $barber)
+    {
+        $request->validate([
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
+        ]);
+
+        if ($barber->user_id) {
+            return response()->json(['message' => 'Este barbero ya tiene un usuario asociado'], 400);
+        }
+
+        $user = \App\Models\User::create([
+            'name' => $barber->name,
+            'email' => $request->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'role' => 'BARBER',
+        ]);
+
+        $barber->user_id = $user->id;
+        $barber->save();
+
+        return $this->success(['message' => 'Acceso creado exitosamente', 'user' => $user]);
+    }
+
+    public function changePassword(Request $request, Barber $barber)
+    {
+        $request->validate([
+            'password' => 'required|min:6',
+        ]);
+
+        if (!$barber->user_id) {
+            return response()->json(['message' => 'Este barbero no tiene un usuario asociado'], 400);
+        }
+
+        $user = \App\Models\User::find($barber->user_id);
+        if (!$user) {
+            return response()->json(['message' => 'Usuario no encontrado'], 404);
+        }
+
+        $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+        $user->save();
+        $user->tokens()->delete();
+
+        return $this->success(['message' => 'Contraseña actualizada exitosamente']);
+    }
+
+    public function uploadAvatar(Request $request, Barber $barber)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpeg,jpg,png|max:2048'
+        ]);
+
+        if ($request->hasFile('avatar')) {
+            // Eliminar foto anterior si existe
+            if ($barber->avatar_url && \Storage::disk('public')->exists($barber->avatar_url)) {
+                \Storage::disk('public')->delete($barber->avatar_url);
+            }
+
+            // Guardar nueva foto
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $barber->avatar_url = $path;
+            $barber->save();
+
+            return $this->success([
+                'message' => 'Foto actualizada exitosamente',
+                'avatar_url' => asset('storage/' . $path)
+            ]);
+        }
+
+        return response()->json(['message' => 'No se recibió ningún archivo'], 400);
+    }
+
+    public function removeAvatar(Barber $barber)
+    {
+        if ($barber->avatar_url) {
+            if (\Storage::disk('public')->exists($barber->avatar_url)) {
+                \Storage::disk('public')->delete($barber->avatar_url);
+            }
+            $barber->avatar_url = null;
+            $barber->save();
+        }
+
+        return $this->success(['message' => 'Foto eliminada exitosamente']);
+    }
 }

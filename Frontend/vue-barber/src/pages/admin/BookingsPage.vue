@@ -102,7 +102,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
+  <div class="min-h-screen">
     <!-- Header -->
     <div class="mb-8">
       <h1 class="text-3xl font-display font-bold text-dark-800 mb-2">

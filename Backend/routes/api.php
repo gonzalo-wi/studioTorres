@@ -8,8 +8,10 @@ use App\Http\Controllers\Api\Admin\GalleryController as AdminGalleryController;
 use App\Http\Controllers\Api\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\AvailabilityController;
+use App\Http\Controllers\Api\BarberPanelController;
 use App\Http\Controllers\Api\GalleryController;
 use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\WaitlistController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -35,6 +37,12 @@ Route::get('/availability', [AvailabilityController::class, 'index']);
 // Appointments
 Route::post('/appointments', [AppointmentController::class, 'store']);
 Route::get('/appointments/{publicCode}', [AppointmentController::class, 'show']);
+
+// Waitlist (Public)
+Route::post('/waitlist', [WaitlistController::class, 'store']);
+Route::get('/waitlist/{id}', [WaitlistController::class, 'show']);
+Route::delete('/waitlist/{id}', [WaitlistController::class, 'destroy']);
+Route::post('/waitlist/{id}/confirm', [WaitlistController::class, 'confirmFromWaitlist']);
 
 /*
 |--------------------------------------------------------------------------
@@ -67,6 +75,10 @@ Route::prefix('admin')->group(function () {
         Route::post('/barbers/{barber}/schedules', [BarberController::class, 'updateSchedules']);
         Route::get('/barbers/{barber}/appointments', [BarberController::class, 'appointments']);
         Route::get('/barbers/{barber}/earnings', [BarberController::class, 'earnings']);
+        Route::post('/barbers/{barber}/create-user-access', [BarberController::class, 'createUserAccess']);
+        Route::post('/barbers/{barber}/change-password', [BarberController::class, 'changePassword']);
+        Route::post('/barbers/{barber}/upload-avatar', [BarberController::class, 'uploadAvatar']);
+        Route::delete('/barbers/{barber}/remove-avatar', [BarberController::class, 'removeAvatar']);
 
         // Clients
         Route::get('/clients', [ClientController::class, 'index']);
@@ -86,5 +98,14 @@ Route::prefix('admin')->group(function () {
         // Reports
         Route::get('/reports', [AdminAppointmentController::class, 'reports']);
         Route::get('/reports/export', [AdminAppointmentController::class, 'exportReports']);
+
+        // Barber Panel (endpoints específicos para barberos autenticados)
+        Route::get('/barber-panel/stats', [BarberPanelController::class, 'stats']);
+        Route::get('/barber-panel/appointments', [BarberPanelController::class, 'appointments']);
+        Route::put('/barber-panel/appointments/{appointment}/status', [BarberPanelController::class, 'updateAppointmentStatus']);
+
+        // Waitlist Admin
+        Route::get('/waitlist', [WaitlistController::class, 'index']);
+        Route::get('/waitlist/stats', [WaitlistController::class, 'stats']);
     });
 });

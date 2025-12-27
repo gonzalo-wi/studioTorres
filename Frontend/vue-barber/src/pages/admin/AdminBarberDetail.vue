@@ -18,6 +18,172 @@
     </div>
 
     <div class="max-w-7xl mx-auto space-y-8">
+      <!-- Foto de Perfil Section -->
+      <div class="bg-white border border-gold-200 rounded-xl overflow-hidden shadow-lg">
+        <div class="bg-gradient-to-r from-gold-500 to-gold-600 px-6 py-4">
+          <div class="flex items-center gap-3">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <h2 class="text-xl font-bold text-white">Foto de Perfil</h2>
+          </div>
+          <p class="text-gold-100 text-sm mt-1">La foto se mostrará al momento de reservar turno</p>
+        </div>
+        
+        <div class="p-6">
+          <div class="flex items-start gap-6">
+            <div class="flex-shrink-0">
+              <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-200 border-4 border-gold-300">
+                <img v-if="previewUrl || barber?.avatar_full_url" 
+                  :src="previewUrl || barber.avatar_full_url" 
+                  :alt="barber.name" 
+                  class="w-full h-full object-cover" />
+                <div v-else class="w-full h-full flex items-center justify-center text-dark-400">
+                  <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+              </div>
+              <p v-if="previewUrl" class="text-center text-sm text-gold-600 font-semibold mt-2">Vista previa</p>
+            </div>
+            
+            <div class="flex-1">
+              <form @submit.prevent="uploadAvatar" class="space-y-4">
+                <div>
+                  <label class="block text-dark-700 font-semibold mb-2">Subir nueva foto</label>
+                  <input @change="handleFileChange" type="file" accept="image/*" ref="fileInput"
+                    class="w-full text-dark-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gold-500 file:text-white file:font-semibold hover:file:bg-gold-600 file:cursor-pointer" />
+                  <p class="text-dark-600 text-sm mt-2">Formato: JPG, PNG. Tamaño máximo: 2MB</p>
+                </div>
+                
+                <div v-if="avatarError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                  {{ avatarError }}
+                </div>
+                
+                <div v-if="avatarSuccess" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                  {{ avatarSuccess }}
+                </div>
+                
+                <div class="flex gap-3">
+                  <button type="submit" :disabled="!selectedFile || avatarLoading"
+                    class="bg-gold-600 hover:bg-gold-700 text-white font-semibold py-3 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span v-if="avatarLoading">Subiendo...</span>
+                    <span v-else>Subir Foto</span>
+                  </button>
+                  
+                  <button v-if="barber?.avatar_url" @click.prevent="removeAvatar" type="button" :disabled="avatarLoading"
+                    class="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition disabled:opacity-50">
+                    Eliminar Foto
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acceso de Usuario Section -->
+      <div v-if="!barber?.user" class="bg-white border border-blue-200 rounded-xl overflow-hidden shadow-lg">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+          <div class="flex items-center gap-3">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+            <h2 class="text-xl font-bold text-white">Crear Acceso al Panel</h2>
+          </div>
+          <p class="text-blue-100 text-sm mt-1">Este barbero aún no tiene acceso. Crea un usuario para que pueda ingresar.</p>
+        </div>
+        
+        <div class="p-6">
+          <form @submit.prevent="createUserAccess" class="space-y-4">
+            <div>
+              <label class="block text-dark-700 font-semibold mb-2">Email</label>
+              <input v-model="userForm.email" type="email" required
+                class="w-full bg-white border border-gold-300 text-dark-800 py-3 px-4 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder="barbero@email.com" />
+            </div>
+            
+            <div>
+              <label class="block text-dark-700 font-semibold mb-2">Contraseña</label>
+              <input v-model="userForm.password" type="password" required minlength="6"
+                class="w-full bg-white border border-gold-300 text-dark-800 py-3 px-4 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder="Mínimo 6 caracteres" />
+            </div>
+            
+            <div v-if="userError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              {{ userError }}
+            </div>
+            
+            <div v-if="userSuccess" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+              {{ userSuccess }}
+            </div>
+            
+            <button type="submit" :disabled="userLoading"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition disabled:opacity-50">
+              <span v-if="userLoading">Creando...</span>
+              <span v-else>Crear Acceso</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Cambiar Contraseña Section (si tiene usuario) -->
+      <div v-else class="bg-white border border-green-200 rounded-xl overflow-hidden shadow-lg">
+        <div class="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+          <div class="flex items-center gap-3">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h2 class="text-xl font-bold text-white">Acceso Configurado</h2>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-dark-800 font-semibold">{{ barber.user.email }}</p>
+                <p class="text-dark-600 text-sm">Puede ingresar a /barber/login</p>
+              </div>
+            </div>
+            <button @click="showPasswordForm = !showPasswordForm"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition">
+              {{ showPasswordForm ? 'Cancelar' : 'Cambiar Contraseña' }}
+            </button>
+          </div>
+
+          <div v-if="showPasswordForm" class="pt-6 border-t border-green-200">
+            <form @submit.prevent="changePassword" class="space-y-4 max-w-md">
+              <div>
+                <label class="block text-dark-700 font-semibold mb-2">Nueva Contraseña</label>
+                <input v-model="passwordForm.password" type="password" required minlength="6"
+                  class="w-full bg-white border border-gold-300 text-dark-800 py-3 px-4 rounded-lg focus:ring-2 focus:ring-blue-500 transition"
+                  placeholder="Mínimo 6 caracteres" />
+              </div>
+              
+              <div v-if="passwordError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {{ passwordError }}
+              </div>
+              
+              <div v-if="passwordSuccess" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                {{ passwordSuccess }}
+              </div>
+              
+              <button type="submit" :disabled="passwordLoading"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition disabled:opacity-50">
+                <span v-if="passwordLoading">Cambiando...</span>
+                <span v-else>Cambiar Contraseña</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
       <!-- Horarios Section -->
       <div class="bg-white border border-gold-200 rounded-xl overflow-hidden shadow-lg">
         <div class="bg-gradient-to-r from-gold-500 to-gold-600 px-6 py-4">
@@ -288,6 +454,115 @@ const filters = reactive({ from: '', to: '', status: '' })
 const appointments = ref([])
 const earnings = ref(null)
 
+// User access form
+const userForm = reactive({ email: '', password: '' })
+const userLoading = ref(false)
+const userError = ref(null)
+const userSuccess = ref(null)
+
+// Password change form
+const showPasswordForm = ref(false)
+const passwordForm = reactive({ password: '' })
+const passwordLoading = ref(false)
+const passwordError = ref(null)
+const passwordSuccess = ref(null)
+
+// Avatar upload
+const selectedFile = ref(null)
+const fileInput = ref(null)
+const avatarLoading = ref(false)
+const avatarError = ref(null)
+const avatarSuccess = ref(null)
+const previewUrl = ref(null)
+
+function handleFileChange(event) {
+  const file = event.target.files[0]
+  if (file) {
+    if (file.size > 2 * 1024 * 1024) {
+      avatarError.value = 'El archivo es muy grande. Máximo 2MB'
+      selectedFile.value = null
+      previewUrl.value = null
+      return
+    }
+    
+    // Crear preview
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      previewUrl.value = e.target.result
+    }
+    reader.readAsDataURL(file)
+    
+    selectedFile.value = file
+    avatarError.value = null
+  }
+}
+
+async function uploadAvatar() {
+  if (!selectedFile.value) return
+
+  avatarLoading.value = true
+  avatarError.value = null
+  avatarSuccess.value = null
+
+  try {
+    const formData = new FormData()
+    formData.append('avatar', selectedFile.value)
+
+    const response = await fetch(`http://localhost:8000/api/admin/barbers/${id}/upload-avatar`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+      },
+      body: formData
+    })
+
+    if (!response.ok) throw new Error('Error al subir la foto')
+
+    avatarSuccess.value = 'Foto actualizada exitosamente'
+    selectedFile.value = null
+    previewUrl.value = null
+    if (fileInput.value) fileInput.value.value = ''
+    
+    setTimeout(async () => {
+      await loadBarber(id)
+      avatarSuccess.value = null
+    }, 1500)
+  } catch (error) {
+    avatarError.value = error.message || 'Error al subir la foto'
+  } finally {
+    avatarLoading.value = false
+  }
+}
+
+async function removeAvatar() {
+  if (!confirm('¿Eliminar la foto de perfil?')) return
+
+  avatarLoading.value = true
+  avatarError.value = null
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/admin/barbers/${id}/remove-avatar`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+      }
+    })
+
+    if (!response.ok) throw new Error('Error al eliminar la foto')
+
+    avatarSuccess.value = 'Foto eliminada exitosamente'
+    
+    setTimeout(async () => {
+      await loadBarber(id)
+      avatarSuccess.value = null
+    }, 1500)
+  } catch (error) {
+    avatarError.value = error.message || 'Error al eliminar la foto'
+  } finally {
+    avatarLoading.value = false
+  }
+}
+
 function applyScheduleDefaults() {
   const schedules = barber.value?.schedules || []
   schedules.forEach(s => {
@@ -334,6 +609,69 @@ function getStatusClass(status) {
     DONE: 'bg-purple-100 text-purple-700 border border-purple-300'
   }
   return classes[status] || 'bg-gray-100 text-gray-700'
+}
+
+async function createUserAccess() {
+  userLoading.value = true
+  userError.value = null
+  userSuccess.value = null
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/admin/barbers/${id}/create-user-access`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+      },
+      body: JSON.stringify(userForm)
+    })
+
+    if (!response.ok) throw new Error('Error al crear acceso')
+
+    userSuccess.value = 'Acceso creado exitosamente'
+    userForm.email = ''
+    userForm.password = ''
+    
+    setTimeout(async () => {
+      await loadBarber(id)
+      userSuccess.value = null
+    }, 1500)
+  } catch (error) {
+    userError.value = error.message || 'Error al crear acceso'
+  } finally {
+    userLoading.value = false
+  }
+}
+
+async function changePassword() {
+  passwordLoading.value = true
+  passwordError.value = null
+  passwordSuccess.value = null
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/admin/barbers/${id}/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+      },
+      body: JSON.stringify(passwordForm)
+    })
+
+    if (!response.ok) throw new Error('Error al cambiar contraseña')
+
+    passwordSuccess.value = 'Contraseña actualizada exitosamente'
+    passwordForm.password = ''
+    
+    setTimeout(() => {
+      showPasswordForm.value = false
+      passwordSuccess.value = null
+    }, 1500)
+  } catch (error) {
+    passwordError.value = error.message || 'Error al cambiar contraseña'
+  } finally {
+    passwordLoading.value = false
+  }
 }
 
 onMounted(async () => {

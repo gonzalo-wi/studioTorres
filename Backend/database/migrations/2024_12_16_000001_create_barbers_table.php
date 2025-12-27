@@ -9,6 +9,7 @@ return new class extends Migration {
     {
         Schema::create('barbers', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->string('name');
             $table->boolean('active')->default(true);
             $table->string('phone')->nullable();
@@ -17,6 +18,8 @@ return new class extends Migration {
             $table->enum('earnings_type', ['FIJO', 'PORCENTAJE'])->default('PORCENTAJE');
             $table->decimal('earnings_value', 8, 2)->default(50.00);
             $table->timestamps();
+            
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 

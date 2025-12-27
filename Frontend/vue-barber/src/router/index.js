@@ -63,23 +63,27 @@ const routes = [
       {
         path: 'services',
         name: 'AdminServices',
-        component: () => import('@/pages/admin/ServicesPage.vue')
+        component: () => import('@/pages/admin/ServicesPage.vue'),
+        meta: { requiresAdmin: true }
       }
       ,
       {
         path: 'barbers',
         name: 'admin-barbers',
-        component: () => import('@/pages/admin/AdminBarbersList.vue')
+        component: () => import('@/pages/admin/AdminBarbersList.vue'),
+        meta: { requiresAdmin: true }
       },
       {
         path: 'barbers/:id',
         name: 'admin-barber-detail',
-        component: () => import('@/pages/admin/AdminBarberDetail.vue')
+        component: () => import('@/pages/admin/AdminBarberDetail.vue'),
+        meta: { requiresAdmin: true }
       },
       {
         path: 'reports',
         name: 'admin-reports',
-        component: () => import('@/pages/admin/ReportsPage.vue')
+        component: () => import('@/pages/admin/ReportsPage.vue'),
+        meta: { requiresAdmin: true }
       }
     ]
   }
@@ -98,11 +102,20 @@ const router = createRouter({
 
 // Navigation guard
 router.beforeEach(async (to, from, next) => {
-  const { checkAuth } = useAuth()
+  const { checkAuth, user } = useAuth()
   
   if (to.meta.requiresAuth) {
     const isAuth = await checkAuth()
     if (isAuth) {
+      // Verificar si la ruta requiere rol ADMIN
+      if (to.meta.requiresAdmin) {
+        const userRole = localStorage.getItem('user_role')
+        if (userRole !== 'ADMIN') {
+          // Redirigir a dashboard si es BARBER intentando acceder a rutas admin
+          next('/admin')
+          return
+        }
+      }
       next()
     } else {
       next('/admin/login')

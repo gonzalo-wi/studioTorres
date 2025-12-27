@@ -57,7 +57,6 @@ const updateValue = (event) => {
       :id="selectId"
       :value="modelValue"
       :disabled="disabled"
-      :required="required"
       @change="updateValue"
       :class="[
         'w-full px-4 py-3 bg-white border rounded-lg text-dark-900 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50',

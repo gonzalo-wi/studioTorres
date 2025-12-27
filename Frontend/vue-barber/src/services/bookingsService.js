@@ -70,10 +70,18 @@ export async function fetchBookingByCode(publicCode) {
 // ============================================
 
 /**
- * Fetch all bookings (admin)
+ * Fetch all bookings (admin o barber según rol)
  */
 export async function fetchBookings(filters = {}) {
-  const response = await get('/admin/appointments', filters)
+  const userRole = localStorage.getItem('user_role')
+  
+  let response
+  if (userRole === 'BARBER') {
+    response = await get('/admin/barber-panel/appointments', filters)
+  } else {
+    response = await get('/admin/appointments', filters)
+  }
+  
   // Handle both array and paginated responses
   const payload = Array.isArray(response.data)
     ? response.data
@@ -140,16 +148,23 @@ export async function fetchBookingById(id) {
 }
 
 /**
- * Update booking status (admin)
+ * Update booking status (admin o barber según rol)
  */
 export async function updateBookingStatus(id, status, date = null, time = null) {
+  const userRole = localStorage.getItem('user_role')
   const body = { status }
   
   if (date) body.date = date
   if (time) body.time = time
   
-  const response = await put(`/admin/appointments/${id}/status`, body)
-  const a = response.data.appointment
+  let response
+  if (userRole === 'BARBER') {
+    response = await put(`/admin/barber-panel/appointments/${id}/status`, body)
+  } else {
+    response = await put(`/admin/appointments/${id}/status`, body)
+  }
+  
+  const a = response.data.appointment || response.data
   
   // Parse ISO 8601 datetime to separate date/time
   const dateObj = new Date(a.starts_at)
@@ -188,9 +203,16 @@ export async function cancelBooking(id) {
 }
 
 /**
- * Get dashboard stats (admin)
+ * Get dashboard stats (admin o barber según rol)
  */
 export async function getBookingStats() {
+  const userRole = localStorage.getItem('user_role')
+  
+  if (userRole === 'BARBER') {
+    const response = await get('/admin/barber-panel/stats')
+    return response.data
+  }
+  
   const response = await get('/admin/dashboard/stats')
   return response.data
 }
